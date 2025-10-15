@@ -25,7 +25,7 @@ class SettingsState extends Equatable {
 class SettingsCubit extends Cubit<SettingsState> {
   SettingsCubit() : super(const SettingsState(soundOn: true, hardness: 3));
 
-  void toggleSound() => emit(state.copyWith(soundOn: !state.soundOn));
+  void toggleSound() => emit(state.copyWith(soundOn: !state.soundOn)); //TODO
 
   void setHardness(int value) {
     final v = value.clamp(1, 5);

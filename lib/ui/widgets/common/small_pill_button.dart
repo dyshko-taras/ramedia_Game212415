@@ -1,59 +1,55 @@
-// path: lib/ui/widgets/common/large_pill_button.dart
+// path: lib/ui/widgets/common/small_pill_button.dart
 import 'package:code/constants/app_images.dart';
 import 'package:code/ui/theme/app_colors.dart';
 import 'package:code/ui/theme/app_spacing.dart';
 import 'package:code/ui/widgets/common/baloo_text.dart';
 import 'package:flutter/material.dart';
 
-class LargePillButton extends StatelessWidget {
-  const LargePillButton({
-    required this.width,
+class SmallPillButton extends StatelessWidget {
+  const SmallPillButton({
     required this.label,
     required this.onTap,
     super.key,
   });
 
-  final double width;
   final String label;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    // Height ratio estimated from art (~3.5:1); clamp for small screens.
-    final height = (width / 3.5).clamp(48, 128);
+    const w = 121;
+    const h = 66;
 
     return Semantics(
       button: true,
       label: label,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(height / 2),
+        borderRadius: BorderRadius.circular(h / 2),
         child: Ink(
-          width: width,
-          height: height.toDouble(),
+          width: w.toDouble(),
+          height: h.toDouble(),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(height / 2),
+            borderRadius: BorderRadius.circular(h / 2),
           ),
           child: Stack(
             alignment: Alignment.center,
             children: [
-              // Background pill image
               Positioned.fill(
                 child: Image.asset(
-                  AppImages.btnLarge,
+                  AppImages.btnSmall,
                   fit: BoxFit.fill,
+                  scale: 2,
                 ),
               ),
-              // Label
-              const Padding(
+              Padding(
                 padding: Space.aS,
-                child: SizedBox.shrink(),
-              ),
-              BalooText(
-                label,
-                size: BalooSize.button32,
-                color: AppColors.white,
-                shadow: true,
+                child: BalooText(
+                  label,
+                  size: BalooSize.button32,
+                  color: AppColors.white,
+                  shadow: true,
+                ),
               ),
             ],
           ),

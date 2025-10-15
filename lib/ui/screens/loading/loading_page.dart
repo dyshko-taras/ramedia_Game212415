@@ -28,8 +28,8 @@ class _LoadingPageState extends State<LoadingPage> {
     super.initState();
     // Safe: provider lives above this widget (in AppRoutes).
     final c = context.read<LoadingCubit>();
-    _ticker = Timer.periodic(const Duration(milliseconds: 60), (t) {
-      c.tick(0.01);
+    _ticker = Timer.periodic(const Duration(milliseconds: 30), (t) {
+      c.tick(0.03);
     });
   }
 

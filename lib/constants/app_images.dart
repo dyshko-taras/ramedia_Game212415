@@ -28,17 +28,18 @@ abstract final class AppImages {
 
   // Settings controls
   static const String settingsPanel = 'assets/images/settings_panel.png';
-  static const String btnBackSmall = 'assets/images/btn_back_small.png';
+  static const String btnBack = 'assets/images/btn_back.png';
   static const String btnSmall = 'assets/images/btn_small.png';
   static const String checkboxChecked = 'assets/images/checkbox_checked.png';
   static const String checkboxUnchecked =
       'assets/images/checkbox_unchecked.png';
   static const String sliderTrack = 'assets/images/slider_track.png';
+  static const String sliderBack = 'assets/images/slider_back.png';
   static const String sliderThumb = 'assets/images/slider_thumb.png';
-
-  // Decorative elements / panels
   static const String decorCandy1 = 'assets/images/decor_candy1.png';
   static const String decorCandy2 = 'assets/images/decor_candy2.png';
+
+  // Decorative elements / panels
   static const String decorCandy3 = 'assets/images/decor_candy3.png';
   static const String infoPanel = 'assets/images/info_panel.png';
   static const String scrollBarTrack = 'assets/images/scroll_bar_track.png';
@@ -78,55 +79,4 @@ abstract final class AppImages {
 
   // Icons
   static const String iconStar = 'assets/images/icon_star.png';
-
-  /// Registry of all declared image assets for quick validations and iteration in tests.
-  static const List<String> all = <String>[
-    backgroundMenu,
-    backgroundDialog0,
-    backgroundDialog1,
-    candyStatic,
-    progressFrame,
-    progressFill,
-    mainScoreBanner,
-    btnLarge,
-    settingsPanel,
-    btnBackSmall,
-    checkboxChecked,
-    checkboxUnchecked,
-    sliderTrack,
-    sliderThumb,
-    btnSmall,
-    decorCandy1,
-    decorCandy2,
-    decorCandy3,
-    infoPanel,
-    scrollBarTrack,
-    scrollBarThumb,
-    infoItemBg,
-    candyBlueSwirl,
-    candyPinkSwirl,
-    candySkyBlue,
-    candyGreen,
-    candyPurple,
-    candyCool,
-    candyTurquoise,
-    candyYellow,
-    candyRed,
-    candyPuple,
-    characterPink,
-    characterBlue,
-    scorePanel,
-    nextCandyPanel,
-    gameFrame,
-    tapHintHand,
-    candiesBar,
-    topLine,
-    characterLeft,
-    chupachupsBig,
-    dialogWin,
-    dialogLose,
-    btnRetry,
-    btnGetBonus,
-    iconStar,
-  ];
 }
