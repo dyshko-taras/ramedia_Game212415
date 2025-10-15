@@ -22,14 +22,14 @@ abstract final class AppImages {
   static const String progressFrame = 'assets/images/progress_frame.png';
   static const String progressFill = 'assets/images/progress_fill.png';
 
-  // Main menu & common UI
+  // Main menu
   static const String mainScoreBanner = 'assets/images/main_score_banner.png';
   static const String btnLarge = 'assets/images/btn_large.png';
+
+  // Settings controls
   static const String settingsPanel = 'assets/images/settings_panel.png';
   static const String btnBackSmall = 'assets/images/btn_back_small.png';
   static const String btnSmall = 'assets/images/btn_small.png';
-
-  // Settings controls
   static const String checkboxChecked = 'assets/images/checkbox_checked.png';
   static const String checkboxUnchecked =
       'assets/images/checkbox_unchecked.png';
