@@ -24,9 +24,7 @@ abstract final class AppImages {
 
   // Main menu & common UI
   static const String mainScoreBanner = 'assets/images/main_score_banner.png';
-  static const String btnPlay = 'assets/images/btn_play.png';
-  static const String btnInfo = 'assets/images/btn_info.png';
-  static const String btnSettings = 'assets/images/btn_settings.png';
+  static const String btnLarge = 'assets/images/btn_large.png';
   static const String settingsPanel = 'assets/images/settings_panel.png';
   static const String btnBackSmall = 'assets/images/btn_back_small.png';
   static const String btnSmall = 'assets/images/btn_small.png';
@@ -90,9 +88,7 @@ abstract final class AppImages {
     progressFrame,
     progressFill,
     mainScoreBanner,
-    btnPlay,
-    btnInfo,
-    btnSettings,
+    btnLarge,
     settingsPanel,
     btnBackSmall,
     checkboxChecked,
