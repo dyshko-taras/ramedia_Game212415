@@ -1,21 +1,10 @@
 // path: lib/ui/screens/info/info_page.dart
-import 'dart:math' as math;
-
 import 'package:code/constants/app_images.dart';
-import 'package:code/ui/theme/app_colors.dart';
 import 'package:code/ui/theme/app_spacing.dart';
 import 'package:code/ui/widgets/common/baloo_text.dart';
 import 'package:code/ui/widgets/common/blur_background.dart';
 import 'package:flutter/material.dart';
 
-/// Info screen:
-/// - Blurred background
-/// - Central info panel with title
-/// - Scrollable items (icon + title + paragraph)
-/// - Custom right-side scrollbar (track + thumb)
-/// - Back button and decorative candies
-///
-/// Images rule: every Image.asset uses `scale: 2`; size comes from parents.
 class InfoPage extends StatefulWidget {
   const InfoPage({super.key});
 
@@ -25,28 +14,25 @@ class InfoPage extends StatefulWidget {
 
 class _InfoPageState extends State<InfoPage> {
   final _controller = ScrollController();
-  double _thumbTop = 0;
+  double _progress = 0; // 0..1 for custom scrollbar
 
   @override
   void initState() {
     super.initState();
-    _controller.addListener(_updateThumb);
+    _controller.addListener(_onScroll);
   }
 
-  void _updateThumb() {
+  void _onScroll() {
     if (!_controller.hasClients) return;
-    final maxExtent = _controller.position.maxScrollExtent;
-    final pixels = _controller.position.pixels.clamp(0.0, maxExtent);
-    final progress = maxExtent == 0 ? 0.0 : (pixels / maxExtent);
-    setState(() {
-      _thumbTop = progress; // normalized; actual px computed in layout
-    });
+    final max = _controller.position.maxScrollExtent;
+    final px = _controller.position.pixels.clamp(0, max);
+    setState(() => _progress = max == 0 ? 0 : px / max);
   }
 
   @override
   void dispose() {
     _controller
-      ..removeListener(_updateThumb)
+      ..removeListener(_onScroll)
       ..dispose();
     super.dispose();
   }
@@ -59,128 +45,129 @@ class _InfoPageState extends State<InfoPage> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: SafeArea(
-          child: Center(
-            child: Padding(
-              padding: Space.hxL,
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final maxWidth = constraints.maxWidth;
-                  // final panelWidth = (maxWidth * 0.84).clamp(280, 560);
-                  // final panelHeight = (panelWidth * 1.32).clamp(
-                  //   420,
-                  //   820,
-                  // );
-                  const panelWidth = 372.0;
-                  const panelHeight = 652.0;
-
-                  return SizedBox(
-                    width: panelWidth,
-                    height: panelHeight,
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        // Panel background
-                        Positioned.fill(
-                          child: Image.asset(
-                            AppImages.infoPanel,
-                            fit: BoxFit.fill,
-                            scale: 2,
-                          ),
-                        ),
-
-                        // Title
-                        const Align(
-                          alignment: Alignment.topCenter,
-                          child: Padding(
-                            padding: EdgeInsets.only(top: 24),
-                            child: BalooText(
-                              'INFO',
-                              size: BalooSize.button32,
-                              color: AppColors.white,
-                              shadow: true,
-                            ),
-                          ),
-                        ),
-
-                        // Right candy decor (foreground)
-                        Positioned(
-                          right: -panelWidth * 0.04,
-                          top: panelHeight * 0.38,
-                          width: panelWidth * 0.08, // thin stick + candy
-                          child: Image.asset(
-                            AppImages.scrollBarTrack, // visual pole-like decor
-                            fit: BoxFit.contain,
-                            scale: 2,
-                          ),
-                        ),
-
-                        // Left-bottom decor candy
-                        Positioned(
-                          left: -panelWidth * 0.15,
-                          bottom: -panelHeight * 0.02,
-                          width: panelWidth * 0.40,
-                          child: Image.asset(
-                            AppImages.decorCandy1,
-                            fit: BoxFit.contain,
-                            scale: 2,
-                          ),
-                        ),
-
-                        // Right-bottom decor candy
-                        Positioned(
-                          right: -panelWidth * 0.02,
-                          bottom: -panelHeight * 0.00,
-                          width: panelWidth * 0.35,
-                          child: Image.asset(
-                            AppImages.decorCandy2,
-                            fit: BoxFit.contain,
-                            scale: 2,
-                          ),
-                        ),
-
-                        // Scrollable content + custom scrollbar
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                            panelWidth * 0.08,
-                            panelHeight * 0.18,
-                            panelWidth * 0.15, // leave room for scrollbar
-                            panelHeight * 0.08,
-                          ),
-                          child: _ScrollableInfoList(
-                            controller: _controller,
-                            onPainted: (thumbAreaHeight, thumbHeight) {
-                              // Recompute px offset when first laid out
-                              _updateThumb();
-                            },
-                          ),
-                        ),
-
-                        // Custom scrollbar (track + thumb) attached to right inset
-                        Positioned(
-                          right: panelWidth * 0.06,
-                          top: panelHeight * 0.22,
-                          width: panelWidth * 0.04,
-                          height: panelHeight * 0.60,
-                          child: _ScrollBar(
-                            controller: _controller,
-                            progress: _thumbTop,
-                          ),
-                        ),
-
-                        // Back button (top-left outside content)
-                        Positioned(
-                          left: Space.s,
-                          top: Space.s,
-                          child: _BackButton(
-                            onTap: () => Navigator.of(context).pop(),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Back button in the top-left corner.
+              const Padding(
+                padding: EdgeInsets.only(
+                  top: Space.s,
+                  left: Space.s,
+                ),
+                child: _BackButton(),
               ),
-            ),
+              // Main panel & content centered.
+              Expanded(
+                child: Center(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: SizedBox(
+                          width: constraints.maxWidth * 0.9,
+                          height: constraints.maxHeight * 0.9,
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            alignment: Alignment.center,
+                            children: [
+                              // Panel background
+                              Image.asset(
+                                AppImages.infoPanel,
+                                fit: BoxFit.contain,
+                              ),
+
+                              // Content
+                              Padding(
+                                padding: EdgeInsets.fromLTRB(
+                                  constraints.maxWidth * 0.2,
+                                  constraints.maxHeight * 0.15,
+                                  constraints.maxWidth * 0.04,
+                                  constraints.maxHeight * 0.1,
+                                ),
+                                child: Row(
+                                  children: [
+                                    // Scrollable list
+                                    Expanded(
+                                      child: ListView.separated(
+                                        controller: _controller,
+                                        padding: EdgeInsets.zero,
+                                        itemBuilder: (_, i) => _InfoItem(
+                                          data: _items[i],
+                                        ),
+                                        separatorBuilder: (_, _) => Space.vL,
+                                        itemCount: _items.length,
+                                      ),
+                                    ),
+                                    Space.hL,
+
+                                    // Custom scrollbar
+                                    SizedBox(
+                                      width: 16,
+                                      child: LayoutBuilder(
+                                        builder: (context, c) {
+                                          final trackH = c.maxHeight;
+                                          const thumbH = 15;
+                                          final avail = trackH - thumbH;
+                                          final top = avail * _progress;
+
+                                          return Stack(
+                                            alignment: Alignment.center,
+                                            clipBehavior: Clip.none,
+                                            children: [
+                                              // Track
+                                              Image.asset(
+                                                AppImages.scrollBarTrack,
+                                                height: trackH,
+                                              ),
+                                              // Thumb
+                                              Positioned(
+                                                top: top,
+                                                child: Image.asset(
+                                                  AppImages.scrollBarThumb,
+                                                  fit: BoxFit.contain,
+                                                  scale: 2,
+                                                ),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              // Right candy decor
+                              Positioned(
+                                right: -100,
+                                bottom: -180,
+                                child: Image.asset(
+                                  AppImages.decorCandy3,
+                                  width: 250,
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+
+                              // Left-bottom candy decor
+                              Positioned(
+                                left: -60,
+                                bottom: -100,
+                                child: Image.asset(
+                                  AppImages.decorCandy1,
+                                  width: 200,
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -189,17 +176,16 @@ class _InfoPageState extends State<InfoPage> {
 }
 
 class _BackButton extends StatelessWidget {
-  const _BackButton({required this.onTap});
-  final VoidCallback onTap;
+  const _BackButton();
 
   @override
   Widget build(BuildContext context) {
-    const double size = 56;
+    const double size = 56; // tap area; image scales internally
     return Semantics(
       button: true,
       label: 'Back',
       child: InkWell(
-        onTap: onTap,
+        onTap: () => Navigator.of(context).pop(),
         borderRadius: BorderRadius.circular(size / 2),
         child: Ink(
           width: size,
@@ -218,186 +204,104 @@ class _BackButton extends StatelessWidget {
   }
 }
 
-class _ScrollableInfoList extends StatelessWidget {
-  const _ScrollableInfoList({
-    required this.controller,
-    required this.onPainted,
-  });
-
-  final ScrollController controller;
-  final void Function(double thumbAreaHeight, double thumbHeight) onPainted;
-
-  @override
-  Widget build(BuildContext context) {
-    // Demo items per PRD assets. Texts are in English per mock (can localize later).
-    const items = <(_CandyAsset, String, String)>[
-      (
-        _CandyAsset(AppImages.candyBlueSwirl),
-        'BLUE SWIRL\nCANDY',
-        'ONE INTERESTING FACT IS THAT ITS OCEAN-LIKE WAVES SYMBOLIZE ENDLESS SWEETNESS, MAKING IT FEEL LIKE DIVING INTO A SEA OF SUGAR',
-      ),
-      (
-        _CandyAsset(AppImages.candyPinkSwirl),
-        'PINK SWIRL\nCANDY',
-        'ONE INTERESTING FACT IS THAT GIANT PINK SWIRLS WERE ONCE CARNIVAL CLASSICS, CRAFTED TO LOOK AS FUN AS THEY TASTE',
-      ),
-      (
-        _CandyAsset(AppImages.candySkyBlue),
-        'SKY BLUE\nCANDY',
-        'ONE INTERESTING FACT IS THAT BLUE SWEETS CAN TRICK YOUR TASTE BUDS — MANY ARE BERRY-FLAVORED, NOT BLUEBERRY',
-      ),
-    ];
-
-    return NotificationListener<SizeChangedLayoutNotification>(
-      onNotification: (n) {
-        // layout info for thumb can be derived here if needed
-        onPainted(0, 0);
-        return false;
-      },
-      child: SizeChangedLayoutNotifier(
-        child: ListView.separated(
-          controller: controller,
-          padding: EdgeInsets.zero,
-          itemBuilder: (context, index) {
-            final (asset, title, body) = items[index];
-            return _InfoItem(
-              iconAssetPath: asset.path,
-              title: title,
-              body: body,
-            );
-          },
-          separatorBuilder: (_, __) => Space.vL,
-          itemCount: items.length,
-        ),
-      ),
-    );
-  }
-}
-
 class _InfoItem extends StatelessWidget {
-  const _InfoItem({
-    required this.iconAssetPath,
-    required this.title,
-    required this.body,
-  });
+  const _InfoItem({required this.data});
 
-  final String iconAssetPath;
-  final String title;
-  final String body;
+  final (_CandyAsset, String, String) data;
 
   @override
   Widget build(BuildContext context) {
-    const double iconSide = 96; // parent size; image itself uses scale:2
+    final (icon, title, body) = data;
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
       children: [
-        // Rounded square icon background + candy image
-        SizedBox(
-          width: iconSide,
-          height: iconSide,
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(18),
-                  child: Image.asset(
-                    AppImages.infoItemBg,
-                    fit: BoxFit.cover,
-                    scale: 2,
-                  ),
+        Row(
+          children: [
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Image.asset(
+                  AppImages.infoItemBg,
+                  width: 60,
+                  height: 60,
                 ),
-              ),
-              Center(
-                child: Padding(
-                  padding: Space.aS,
-                  child: Image.asset(
-                    iconAssetPath,
-                    fit: BoxFit.contain,
-                    scale: 2,
-                  ),
+                Image.asset(
+                  icon.path,
+                  width: 48,
+                  height: 48,
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
+            Space.hS,
+            BalooText(
+              title,
+              size: BalooSize.caption20,
+              shadow: true,
+            ),
+          ],
         ),
-        Space.hL,
-        // Title + paragraph
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              BalooText(
-                title,
-                size: BalooSize.dialog24,
-                color: AppColors.white,
-                shadow: true,
-              ),
-              Space.vS,
-              // Paragraph text style – use a simpler Text to allow wrapping
-              Text(
-                body,
-                style: const TextStyle(
-                  fontFamily: 'Baloo', // per visual style
-                  fontSize: 14,
-                  height: 1.4,
-                  color: AppColors.white,
-                ),
-              ),
-            ],
-          ),
-        ),
+        Text(body, style: Theme.of(context).textTheme.bodySmall),
       ],
     );
   }
 }
 
-class _ScrollBar extends StatelessWidget {
-  const _ScrollBar({
-    required this.controller,
-    required this.progress,
-  });
+const _items = <(_CandyAsset, String, String)>[
+  (
+    _CandyAsset(AppImages.candyBlueSwirl),
+    'BLUE SWIRL\nCANDY',
+    'One interesting fact is that its ocean-like waves symbolize endless sweetness, making it feel like diving into a sea of sugar.',
+  ),
+  (
+    _CandyAsset(AppImages.candyPinkSwirl),
+    'PINK SWIRL\nCANDY',
+    'One interesting fact is that giant pink swirls were once carnival classics, crafted to look as fun as they taste.',
+  ),
+  (
+    _CandyAsset(AppImages.candySkyBlue),
+    'SKY BLUE\nCANDY',
+    'One interesting fact is that blue sweets often trick your taste buds — many are raspberry-flavored, not blueberry.',
+  ),
 
-  final ScrollController controller;
-  final double progress; // 0..1
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, c) {
-        final trackHeight = c.maxHeight;
-        final thumbHeight = math.max(32, trackHeight * 0.18);
-        final available = trackHeight - thumbHeight;
-        final top = available * progress;
-
-        return Stack(
-          children: [
-            // Track
-            Positioned.fill(
-              child: Image.asset(
-                AppImages.scrollBarTrack,
-                fit: BoxFit.fill,
-                scale: 2,
-              ),
-            ),
-            // Thumb
-            Positioned(
-              top: top,
-              left: 0,
-              right: 0,
-              height: thumbHeight.toDouble(),
-              child: Image.asset(
-                AppImages.scrollBarThumb,
-                fit: BoxFit.contain,
-                scale: 2,
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
+  // Нові пункти:
+  (
+    _CandyAsset(AppImages.candyGreen),
+    'GREEN\nCANDY',
+    'One interesting fact is that green candies are often minty or lime-flavored, refreshing and energizing with every bite.',
+  ),
+  (
+    _CandyAsset(AppImages.candyPurple),
+    'PURPLE\nCANDY',
+    'One interesting fact is that spiral designs are made to catch the eye, promising endless fun and flavor.',
+  ),
+  (
+    _CandyAsset(AppImages.candyCool),
+    'COOL\nCANDY',
+    'One interesting fact is that pink treats became popular because their playful color is linked with joy and celebration.',
+  ),
+  (
+    _CandyAsset(AppImages.candyTurquoise),
+    'TURQUOISE\nCANDY',
+    'One interesting fact is that rare candy shades like turquoise were made to stand out, shining like hidden gems in a candy shop.',
+  ),
+  (
+    _CandyAsset(AppImages.candyYellow),
+    'YELLOW\nCANDY',
+    'One interesting fact is that yellow sweets add a zingy lemon kick, balancing sugar rush with tangy freshness.',
+  ),
+  (
+    _CandyAsset(AppImages.candyRed),
+    'RED\nCANDY',
+    'One interesting fact is that red candies symbolize love and passion, often being the very first flavor to sell out.',
+  ),
+  (
+    _CandyAsset(
+      AppImages.candyPurple,
+    ), // Якщо “PUPLE” — можливо це дублікат / помилка, але я додам “PURPLE 2”
+    'PURPLE 2\nCANDY',
+    'One interesting fact is that purple candies often taste of berries, but their rich color has long been linked to royalty.',
+  ),
+];
 
 class _CandyAsset {
   const _CandyAsset(this.path);
