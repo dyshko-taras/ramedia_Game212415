@@ -10,7 +10,7 @@ class BlurBackground extends StatelessWidget {
     required this.child,
     super.key,
     this.background,
-    this.sigma = 10,
+    this.sigma = 3,
   });
 
   /// Optional decorative background (e.g., AppImages.backgroundMenu).

@@ -56,12 +56,13 @@ abstract final class AppImages {
   static const String candyTurquoise = 'assets/images/candy_turquoise.png';
   static const String candyYellow = 'assets/images/candy_yellow.png';
   static const String candyRed = 'assets/images/candy_red.png';
-  static const String candyPuple =
-      'assets/images/candy_puple.png'; // Note: inventory spelling
+  static const String candyPuple = 'assets/images/candy_puple.png';
+
+  //Dialogs
+  static const String dialogueBox = 'assets/images/dialogue_box.png';
+  static const String btnNext = 'assets/images/btn_next.png';
 
   // Characters / misc UI
-  static const String characterPink = 'assets/images/character_pink.png';
-  static const String characterBlue = 'assets/images/character_blue.png';
   static const String scorePanel = 'assets/images/score_panel.png';
   static const String nextCandyPanel = 'assets/images/next_candy_panel.png';
   static const String gameFrame = 'assets/images/game_frame.png';
@@ -71,12 +72,10 @@ abstract final class AppImages {
   static const String characterLeft = 'assets/images/character_left.png';
   static const String chupachupsBig = 'assets/images/chupachups_big.png';
 
-  // Dialogs & buttons in-game
+  // Dialogs WIN / LOSE
   static const String dialogWin = 'assets/images/dialog_win.png';
   static const String dialogLose = 'assets/images/dialog_lose.png';
   static const String btnRetry = 'assets/images/btn_retry.png';
   static const String btnGetBonus = 'assets/images/btn_get_bonus.png';
-
-  // Icons
   static const String iconStar = 'assets/images/icon_star.png';
 }

@@ -14,9 +14,6 @@ import 'package:code/ui/widgets/common/large_pill_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-/// Main Menu screen (updated):
-/// - Uses a single large pill image for all buttons via [LargePillButton].
-/// - Removed decorative sprites per request.
 class MainMenuPage extends StatelessWidget {
   const MainMenuPage({super.key});
 
@@ -58,9 +55,15 @@ class _MainMenuView extends StatelessWidget {
                           LargePillButton(
                             width: btnWidth,
                             label: 'PLAY',
-                            onTap: () => Navigator.of(
-                              context,
-                            ).pushReplacementNamed(AppRoutes.game),
+                            onTap: () async {
+                              await Navigator.of(
+                                context,
+                              ).pushReplacementNamed(
+                                state.isDialogueCompleted
+                                    ? AppRoutes.game
+                                    : AppRoutes.dialogue,
+                              );
+                            },
                           ),
                           Space.vL,
                           LargePillButton(

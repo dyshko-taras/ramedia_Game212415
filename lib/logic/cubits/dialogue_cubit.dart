@@ -65,9 +65,12 @@ final class DialogueCubit extends Cubit<DialogueState> {
   /// Advance to the next step. If at the last step, completes the dialogue.
   Future<void> next() async {
     if (state.completed) return;
+
     final nextIndex = state.currentIndex + 1;
-    if (nextIndex >= state.totalSteps) {
-      await _complete();
+
+    if (nextIndex >= state.totalSteps - 1) {
+      emit(state.copyWith(currentIndex: nextIndex, completed: true));
+      await _repo.setDialogueCompleted(true);
     } else {
       emit(state.copyWith(currentIndex: nextIndex));
     }

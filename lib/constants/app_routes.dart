@@ -1,5 +1,6 @@
 // path: lib/constants/app_routes.dart
 import 'package:code/logic/cubits/loading_cubit.dart';
+import 'package:code/ui/screens/dialogue/dialogue_page.dart';
 import 'package:code/ui/screens/info/info_page.dart';
 import 'package:code/ui/screens/loading/loading_page.dart';
 import 'package:code/ui/screens/main_menu/main_menu_page.dart';
@@ -29,8 +30,7 @@ final class AppRoutes {
     settings: (_) => const SettingsPage(),
     info: (_) => const InfoPage(),
 
-    dialogue: (_) =>
-        const Scaffold(body: Center(child: Text('Dialogue — WIP'))),
+    dialogue: (_) => const DialoguePage(),
     game: (_) => const Scaffold(body: Center(child: Text('Game — WIP'))),
   };
 }
