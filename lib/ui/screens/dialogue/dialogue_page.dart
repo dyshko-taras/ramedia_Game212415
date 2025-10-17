@@ -1,6 +1,5 @@
 import 'package:code/constants/app_images.dart';
 import 'package:code/constants/app_routes.dart';
-import 'package:code/data/local/prefs_store.dart';
 import 'package:code/data/repositories/candy_repository.dart';
 import 'package:code/logic/cubits/dialogue_cubit.dart';
 import 'package:code/ui/widgets/common/baloo_text.dart';
@@ -13,18 +12,15 @@ class DialoguePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RepositoryProvider<CandyRepository>(
-      create: (_) => CandyRepository(PrefsStore()),
-      child: BlocProvider<DialogueCubit>(
-        create: (context) {
-          final candyRepo = context.read<CandyRepository>();
-          return DialogueCubit(
-            repository: candyRepo,
-            totalSteps: 4,
-          );
-        },
-        child: const _DialogueView(),
-      ),
+    return BlocProvider<DialogueCubit>(
+      create: (context) {
+        final candyRepo = context.read<CandyRepository>();
+        return DialogueCubit(
+          repository: candyRepo,
+          totalSteps: 4,
+        );
+      },
+      child: const _DialogueView(),
     );
   }
 }

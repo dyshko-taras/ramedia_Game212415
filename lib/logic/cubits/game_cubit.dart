@@ -1,35 +1,65 @@
 // path: lib/logic/cubits/game_cubit.dart
+import 'dart:math';
+
 import 'package:code/data/repositories/candy_repository.dart';
+import 'package:code/game/model/candy_type.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meta/meta.dart';
 
 @immutable
+enum GameUiPhase { hint, playing, ended }
+enum GameOutcome { win, lose }
+
 class GameState extends Equatable {
   const GameState({
     required this.currentScore,
     required this.bestScore,
     required this.isOver,
+    required this.nextCandy,
+    required this.phase,
+    this.lastTapX,
+    this.outcome,
   });
 
   final int currentScore;
   final int bestScore;
   final bool isOver;
+  final CandyType nextCandy;
+  final GameUiPhase phase;
+  final double? lastTapX;
+  final GameOutcome? outcome;
 
   GameState copyWith({
     int? currentScore,
     int? bestScore,
     bool? isOver,
+    CandyType? nextCandy,
+    GameUiPhase? phase,
+    double? lastTapX,
+    GameOutcome? outcome,
   }) {
     return GameState(
       currentScore: currentScore ?? this.currentScore,
       bestScore: bestScore ?? this.bestScore,
       isOver: isOver ?? this.isOver,
+      nextCandy: nextCandy ?? this.nextCandy,
+      phase: phase ?? this.phase,
+      lastTapX: lastTapX ?? this.lastTapX,
+      outcome: outcome ?? this.outcome,
     );
   }
 
   @override
-  List<Object?> get props => <Object?>[currentScore, bestScore, isOver];
+  List<Object?> get props => <Object?>[
+        currentScore,
+        bestScore,
+        isOver,
+        nextCandy,
+        phase,
+        lastTapX,
+        outcome,
+      ];
 }
 
 /// Minimal gameplay state machine for scoring lifecycle.
@@ -37,14 +67,30 @@ class GameState extends Equatable {
 /// - Updates `bestScore` in repository when a run ends with a higher score.
 final class GameCubit extends Cubit<GameState> {
   GameCubit(this._repo)
-    : super(const GameState(currentScore: 0, bestScore: 0, isOver: false));
+    : _rnd = Random(),
+      super(const GameState(
+        currentScore: 0,
+        bestScore: 0,
+        isOver: false,
+        nextCandy: CandyType.level0,
+        phase: GameUiPhase.hint,
+        outcome: null,
+      ));
 
   final CandyRepository _repo;
+  final Random _rnd;
 
   /// Loads persisted best score (call on game start).
   Future<void> load() async {
     final best = await _repo.getBestScore();
-    emit(state.copyWith(bestScore: best, currentScore: 0, isOver: false));
+    emit(state.copyWith(
+      bestScore: best,
+      currentScore: 0,
+      isOver: false,
+      phase: GameUiPhase.hint,
+      outcome: null,
+    ));
+    rollNext();
   }
 
   /// Adds points to the current score (no-ops if game is over).
@@ -67,6 +113,78 @@ final class GameCubit extends Cubit<GameState> {
 
   /// Starts a new run (keeps best score).
   void resetRun() {
-    emit(state.copyWith(currentScore: 0, isOver: false));
+    emit(state.copyWith(
+      currentScore: 0,
+      isOver: false,
+      phase: GameUiPhase.hint,
+      outcome: null,
+    ));
+    rollNext();
+  }
+
+  /// Picks the next candy to display in HUD/preview.
+  void rollNext() {
+    // Simple first pass: 70% L0, 30% L1
+    final next = _rnd.nextInt(100) < 70 ? CandyType.level0 : CandyType.level1;
+    emit(state.copyWith(nextCandy: next));
+  }
+
+  /// Handles tap from UI surface (393-based coords)
+  void onTapAt(double x) {
+    if (state.isOver) return;
+    // First tap starts the session
+    final nextPhase = state.phase == GameUiPhase.hint
+        ? GameUiPhase.playing
+        : state.phase;
+    // Store tap position for any overlay needs
+    emit(state.copyWith(phase: nextPhase, lastTapX: x));
+    // Simulate a spawn effect by rolling next
+    rollNext();
+  }
+
+  // ---- Win / Lose dialog control ----
+
+  Future<void> markWin() async {
+    if (state.isOver) return;
+    var best = state.bestScore;
+    if (state.currentScore > best) {
+      best = state.currentScore;
+      await _repo.setBestScore(best);
+    }
+    emit(state.copyWith(
+      bestScore: best,
+      isOver: true,
+      outcome: GameOutcome.win,
+      phase: GameUiPhase.ended,
+    ));
+  }
+
+  Future<void> markLose() async {
+    if (state.isOver) return;
+    emit(state.copyWith(
+      isOver: true,
+      outcome: GameOutcome.lose,
+      phase: GameUiPhase.ended,
+    ));
+  }
+
+  void closeDialogAndRestart() {
+    emit(state.copyWith(
+      isOver: false,
+      outcome: null,
+      phase: GameUiPhase.hint,
+      currentScore: 0,
+    ));
+    rollNext();
+  }
+
+  void addBonusAndRestart(int bonus) {
+    emit(state.copyWith(
+      isOver: false,
+      outcome: null,
+      phase: GameUiPhase.hint,
+      currentScore: bonus,
+    ));
+    rollNext();
   }
 }

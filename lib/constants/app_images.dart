@@ -62,12 +62,12 @@ abstract final class AppImages {
   static const String dialogueBox = 'assets/images/dialogue_box.png';
   static const String btnNext = 'assets/images/btn_next.png';
 
-  // Characters / misc UI
+  // Gameplay
   static const String scorePanel = 'assets/images/score_panel.png';
   static const String nextCandyPanel = 'assets/images/next_candy_panel.png';
   static const String gameFrame = 'assets/images/game_frame.png';
-  static const String tapHintHand = 'assets/images/tap_hint_hand.png';
   static const String candiesBar = 'assets/images/candies_bar.png';
+  static const String tapHintHand = 'assets/images/tap_hint_hand.png';
   static const String topLine = 'assets/images/top_line.png';
   static const String characterLeft = 'assets/images/character_left.png';
   static const String chupachupsBig = 'assets/images/chupachups_big.png';
@@ -75,7 +75,5 @@ abstract final class AppImages {
   // Dialogs WIN / LOSE
   static const String dialogWin = 'assets/images/dialog_win.png';
   static const String dialogLose = 'assets/images/dialog_lose.png';
-  static const String btnRetry = 'assets/images/btn_retry.png';
-  static const String btnGetBonus = 'assets/images/btn_get_bonus.png';
   static const String iconStar = 'assets/images/icon_star.png';
 }

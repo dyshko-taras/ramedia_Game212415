@@ -3,7 +3,6 @@
 
 import 'package:code/constants/app_images.dart';
 import 'package:code/constants/app_routes.dart';
-import 'package:code/data/local/prefs_store.dart';
 import 'package:code/data/repositories/candy_repository.dart';
 import 'package:code/logic/cubits/main_menu_cubit.dart';
 import 'package:code/ui/theme/app_colors.dart';
@@ -20,8 +19,8 @@ class MainMenuPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<MainMenuCubit>(
-      create: (_) =>
-          MainMenuCubit(CandyRepository(PrefsStore()))..loadBestScore(),
+      create: (context) =>
+          MainMenuCubit(context.read<CandyRepository>())..loadBestScore(),
       child: const _MainMenuView(),
     );
   }
