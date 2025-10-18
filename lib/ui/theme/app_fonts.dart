@@ -6,8 +6,6 @@ abstract final class AppFonts {
   static const String family = 'Baloo';
 }
 
-/// Enumerated sizes as specified (pt ≈ logical px in Flutter TextStyle.fontSize):
-/// Score=64, Labels=40, Buttons=32, Dialog=24, Caption=20, DialogLong=14, Info=10.
 abstract final class FontSizes {
   static const double score64 = 64;
   static const double label40 = 40;
@@ -18,8 +16,6 @@ abstract final class FontSizes {
   static const double info10 = 10;
 }
 
-/// Helper to produce a Baloo text style at an explicit size.
-/// Weight per spec is w400 for all sizes.
 TextStyle baloo(
   double size, {
   Color? color,

@@ -21,7 +21,6 @@ class SettingsState extends Equatable {
   List<Object?> get props => <Object?>[soundOn, hardness];
 }
 
-/// Manages settings interactions.
 class SettingsCubit extends Cubit<SettingsState> {
   SettingsCubit() : super(const SettingsState(soundOn: true, hardness: 3));
 
@@ -33,6 +32,7 @@ class SettingsCubit extends Cubit<SettingsState> {
   }
 
   Future<void> save() async {
+    // TODO
     // Placeholder for future persistence (e.g., SharedPreferences keys).
     // Intentionally no-op in this phase per implementation plan scope.
   }

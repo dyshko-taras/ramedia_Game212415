@@ -249,18 +249,14 @@ class _HardnessSlider extends StatelessWidget {
     return BlocBuilder<SettingsCubit, SettingsState>(
       buildWhen: (p, n) => p.hardness != n.hardness,
       builder: (context, state) {
-        // Розміри компонентів
         const backWidth = 176.0;
         const trackWidth = 160.0;
         const thumbWidth = 15.0;
 
-        // Відступ від центру до початку backplate і треку
         const trackOffset = trackWidth / 2;
 
-        // Плавний прогрес від 0 до 1
         final progress = ((state.hardness - min) / (max - min)).clamp(0.0, 1.0);
 
-        // Позиція thumb: центр - половина треку + прогрес по треку - половина thumb
         final thumbLeft =
             (width / 2) -
             trackOffset +
@@ -298,7 +294,6 @@ class _HardnessSlider extends StatelessWidget {
                   height: 33,
                 ),
 
-                // Track (обрізаний)
                 ClipRect(
                   clipper: _ProgressClipper(progress),
                   child: Image.asset(

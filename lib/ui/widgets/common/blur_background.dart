@@ -3,7 +3,6 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-/// Wraps [child] with a full-screen background image (optional) and a Gaussian blur.
 /// Used by Loading, Main Menu, Settings, Info.
 class BlurBackground extends StatelessWidget {
   const BlurBackground({
@@ -13,10 +12,8 @@ class BlurBackground extends StatelessWidget {
     this.sigma = 3,
   });
 
-  /// Optional decorative background (e.g., AppImages.backgroundMenu).
   final ImageProvider<Object>? background;
 
-  /// Blur radius (sigma). Kept configurable; tokenization of spacing/durations happens in Phase 7.
   final double sigma;
 
   final Widget child;
@@ -32,7 +29,6 @@ class BlurBackground extends StatelessWidget {
       return Stack(
         fit: StackFit.expand,
         children: <Widget>[
-          // No background; just blur the content subtree.
           blurred,
         ],
       );

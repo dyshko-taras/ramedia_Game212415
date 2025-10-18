@@ -3,7 +3,6 @@ import 'package:code/ui/theme/app_colors.dart';
 import 'package:code/ui/theme/app_fonts.dart';
 import 'package:flutter/material.dart';
 
-/// Single Material 3 theme bound to Visual Guide sizes & colors.
 final ThemeData appTheme = _buildTheme();
 
 ThemeData _buildTheme() {
@@ -19,7 +18,6 @@ ThemeData _buildTheme() {
     onSurface: AppColors.onSurface,
   );
 
-  // Map TextTheme roughly to our enumerated sizes for convenience in non-BalooText usages.
   const family = AppFonts.family;
 
   const textTheme = TextTheme(

@@ -29,8 +29,6 @@ class InfoState extends Equatable {
   List<Object?> get props => <Object?>[items];
 }
 
-/// Provides data for Info screen.
-/// Data is static (10 items) and will be bound from PRD constants in Phase 6.
 class InfoCubit extends Cubit<InfoState> {
   InfoCubit() : super(const InfoState(items: <InfoItem>[]));
 

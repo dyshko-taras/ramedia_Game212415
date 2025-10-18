@@ -19,7 +19,6 @@ class LargePillButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Height ratio estimated from art (~3.5:1); clamp for small screens.
     final height = (width / 3.5).clamp(48, 128);
 
     return Semantics(

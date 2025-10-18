@@ -5,10 +5,9 @@ import 'package:code/data/repositories/candy_repository.dart';
 import 'package:code/game/model/candy_type.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:meta/meta.dart';
 
-@immutable
 enum GameUiPhase { hint, playing, ended }
+
 enum GameOutcome { win, lose }
 
 class GameState extends Equatable {
@@ -52,30 +51,28 @@ class GameState extends Equatable {
 
   @override
   List<Object?> get props => <Object?>[
-        currentScore,
-        bestScore,
-        isOver,
-        nextCandy,
-        phase,
-        lastTapX,
-        outcome,
-      ];
+    currentScore,
+    bestScore,
+    isOver,
+    nextCandy,
+    phase,
+    lastTapX,
+    outcome,
+  ];
 }
 
-/// Minimal gameplay state machine for scoring lifecycle.
-/// - Tracks `currentScore` during a run.
-/// - Updates `bestScore` in repository when a run ends with a higher score.
 final class GameCubit extends Cubit<GameState> {
   GameCubit(this._repo)
     : _rnd = Random(),
-      super(const GameState(
-        currentScore: 0,
-        bestScore: 0,
-        isOver: false,
-        nextCandy: CandyType.level0,
-        phase: GameUiPhase.hint,
-        outcome: null,
-      ));
+      super(
+        const GameState(
+          currentScore: 0,
+          bestScore: 0,
+          isOver: false,
+          nextCandy: CandyType.level0,
+          phase: GameUiPhase.hint,
+        ),
+      );
 
   final CandyRepository _repo;
   final Random _rnd;
@@ -83,13 +80,14 @@ final class GameCubit extends Cubit<GameState> {
   /// Loads persisted best score (call on game start).
   Future<void> load() async {
     final best = await _repo.getBestScore();
-    emit(state.copyWith(
-      bestScore: best,
-      currentScore: 0,
-      isOver: false,
-      phase: GameUiPhase.hint,
-      outcome: null,
-    ));
+    emit(
+      state.copyWith(
+        bestScore: best,
+        currentScore: 0,
+        isOver: false,
+        phase: GameUiPhase.hint,
+      ),
+    );
     rollNext();
   }
 
@@ -113,19 +111,20 @@ final class GameCubit extends Cubit<GameState> {
 
   /// Starts a new run (keeps best score).
   void resetRun() {
-    emit(state.copyWith(
-      currentScore: 0,
-      isOver: false,
-      phase: GameUiPhase.hint,
-      outcome: null,
-    ));
+    emit(
+      state.copyWith(
+        currentScore: 0,
+        isOver: false,
+        phase: GameUiPhase.hint,
+      ),
+    );
     rollNext();
   }
 
   /// Picks the next candy to display in HUD/preview.
   void rollNext() {
     // Simple first pass: 70% L0, 30% L1
-    final next = _rnd.nextInt(100) < 70 ? CandyType.level0 : CandyType.level1;
+    final next = _rnd.nextInt(100) < 70 ? CandyType.level5 : CandyType.level1; //TODO
     emit(state.copyWith(nextCandy: next));
   }
 
@@ -151,40 +150,46 @@ final class GameCubit extends Cubit<GameState> {
       best = state.currentScore;
       await _repo.setBestScore(best);
     }
-    emit(state.copyWith(
-      bestScore: best,
-      isOver: true,
-      outcome: GameOutcome.win,
-      phase: GameUiPhase.ended,
-    ));
+    emit(
+      state.copyWith(
+        bestScore: best,
+        isOver: true,
+        outcome: GameOutcome.win,
+        phase: GameUiPhase.ended,
+      ),
+    );
   }
 
   Future<void> markLose() async {
     if (state.isOver) return;
-    emit(state.copyWith(
-      isOver: true,
-      outcome: GameOutcome.lose,
-      phase: GameUiPhase.ended,
-    ));
+    emit(
+      state.copyWith(
+        isOver: true,
+        outcome: GameOutcome.lose,
+        phase: GameUiPhase.ended,
+      ),
+    );
   }
 
   void closeDialogAndRestart() {
-    emit(state.copyWith(
-      isOver: false,
-      outcome: null,
-      phase: GameUiPhase.hint,
-      currentScore: 0,
-    ));
+    emit(
+      state.copyWith(
+        isOver: false,
+        phase: GameUiPhase.hint,
+        currentScore: 0,
+      ),
+    );
     rollNext();
   }
 
   void addBonusAndRestart(int bonus) {
-    emit(state.copyWith(
-      isOver: false,
-      outcome: null,
-      phase: GameUiPhase.hint,
-      currentScore: bonus,
-    ));
+    emit(
+      state.copyWith(
+        isOver: false,
+        phase: GameUiPhase.hint,
+        currentScore: bonus,
+      ),
+    );
     rollNext();
   }
 }

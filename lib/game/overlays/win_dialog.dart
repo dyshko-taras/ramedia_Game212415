@@ -11,7 +11,6 @@ class WinDialog extends StatelessWidget {
     required this.onGetBonus,
     super.key,
   });
-  static const id = 'win_dialog';
 
   final int score;
   final VoidCallback onClose;
@@ -19,70 +18,108 @@ class WinDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ColoredBox(
-      color: Colors.black.withOpacity(0.25),
-      child: Center(
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: Image.asset(AppImages.dialogWin, fit: BoxFit.contain),
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(24),
+          child: Image.asset(AppImages.dialogWin, fit: BoxFit.contain),
+        ),
+        Positioned(
+          top: 60,
+          right: 60,
+          child: GestureDetector(
+            onTap: onClose,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Image.asset(
+                  AppImages.btnClose,
+                  scale: 2,
+                ),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 40),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 40),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const BalooText(
+                'RECORD SCORE:',
+                size: BalooSize.dialogLong14,
+              ),
+              Space.vS,
+              BalooText(
+                '$score',
+                size: BalooSize.button32,
+              ),
+              Space.vS,
+              const BalooText(
+                'YOUR BONUS',
+                size: BalooSize.button32,
+                color: AppColors.white,
+                shadow: true,
+              ),
+              Space.vS,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const BalooText(
-                    'RECORD SCORE:',
-                    size: BalooSize.dialog24,
-                    color: AppColors.white,
-                    shadow: true,
-                  ),
-                  Space.vS,
-                  BalooText(
-                    '$score',
+                    '2500',
                     size: BalooSize.button32,
-                    color: AppColors.white,
                     shadow: true,
                   ),
-                  Space.vL,
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const BalooText(
-                        'YOUR BONUS',
-                        size: BalooSize.button32,
-                        color: AppColors.white,
-                        shadow: true,
-                      ),
-                      Space.hS,
-                      Image.asset(AppImages.iconStar),
-                    ],
-                  ),
-                  Space.vL,
-                  GestureDetector(
-                    onTap: onGetBonus,
-                    child: Image.asset(
-                      AppImages.btnLarge,
-                      fit: BoxFit.contain,
-                    ),
+                  Space.hS,
+                  Image.asset(
+                    AppImages.iconStar,
+                    scale: 2,
                   ),
                 ],
               ),
-            ),
-            Positioned(
-              right: 24,
-              top: 24,
-              child: GestureDetector(
-                onTap: onClose,
-                child: const Icon(Icons.close, color: Colors.white),
+              Space.vS,
+              GestureDetector(
+                onTap: onGetBonus,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Image.asset(
+                      AppImages.btnMedium,
+                      scale: 2,
+                    ),
+                    const BalooText(
+                      'GET BONUS',
+                      size: BalooSize.dialog24,
+                      color: AppColors.white,
+                      shadow: true,
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+              Space.vS,
+              GestureDetector(
+                onTap: onClose,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Image.asset(
+                      AppImages.btnMedium,
+                      scale: 2,
+                    ),
+                    const BalooText(
+                      'EXIT',
+                      size: BalooSize.dialog24,
+                      color: AppColors.white,
+                      shadow: true,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
+      ],
     );
   }
 }

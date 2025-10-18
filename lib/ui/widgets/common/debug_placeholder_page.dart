@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 
-/// A minimal debug/placeholder page used during early phases.
-/// Shows a title and the current route for quick manual verification.
 class DebugPlaceholderPage extends StatelessWidget {
   const DebugPlaceholderPage({
-    super.key,
     required this.title,
+    super.key,
     this.note,
   });
 

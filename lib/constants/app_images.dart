@@ -1,11 +1,3 @@
-// path: lib/constants/app_images.dart
-// Centralized raster asset paths for Image.asset lookups.
-// Contract: widgets must only use AppImages.* (no raw 'assets/...').
-// Source of truth: assets_list.md (inventory) and PRD (required UI parts).
-//
-// Inventory list (assets_list.md) includes all lines below. :contentReference[oaicite:0]{index=0}
-// PRD also references a subset of these for specific screens. :contentReference[oaicite:1]{index=1} :contentReference[oaicite:2]{index=2} :contentReference[oaicite:3]{index=3}
-
 abstract final class AppImages {
   AppImages._();
 
@@ -76,4 +68,6 @@ abstract final class AppImages {
   static const String dialogWin = 'assets/images/dialog_win.png';
   static const String dialogLose = 'assets/images/dialog_lose.png';
   static const String iconStar = 'assets/images/icon_star.png';
+  static const String btnClose = 'assets/images/btn_close.png';
+  static const String btnMedium = 'assets/images/btn_medium.png';
 }

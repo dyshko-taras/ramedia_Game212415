@@ -1,9 +1,6 @@
-// path: lib/data/repositories/candy_repository.dart
 import 'package:code/data/local/prefs_store.dart';
 import 'package:meta/meta.dart';
 
-/// Repository is the single entry point to persistence for Cubits/UI.
-/// It delegates to [PrefsStore] with a small convenience API per plan. :contentReference[oaicite:2]{index=2} :contentReference[oaicite:3]{index=3}
 @immutable
 final class CandyRepository {
   const CandyRepository(this._store);

@@ -3,8 +3,6 @@ import 'package:code/ui/theme/app_colors.dart';
 import 'package:code/ui/theme/app_fonts.dart';
 import 'package:flutter/material.dart';
 
-/// Text widget that enforces Baloo family, Visual Guide sizes,
-/// and optional opposite-color drop shadow.
 class BalooText extends StatelessWidget {
   const BalooText(
     this.text, {
@@ -20,13 +18,10 @@ class BalooText extends StatelessWidget {
 
   final String text;
 
-  /// One of the enumerated Visual Guide sizes.
   final BalooSize size;
 
-  /// Either primary (#990071) or white, per guide. Defaults to primary.
   final Color color;
 
-  /// When true, applies a subtle drop shadow in the opposite color (white ↔︎ primary).
   final bool shadow;
 
   final TextAlign textAlign;

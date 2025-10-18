@@ -27,8 +27,6 @@ class MainMenuState extends Equatable {
   }
 }
 
-/// Loads best score from repository on demand.
-/// Navigation handlers (`onPlay`, `onInfo`, `onSettings`) will be wired in UI layer (Phase 6).
 class MainMenuCubit extends Cubit<MainMenuState> {
   MainMenuCubit(this._repo)
     : super(const MainMenuState(bestScore: 0, isDialogueCompleted: false));

@@ -25,7 +25,6 @@ class MainMenuPage extends StatelessWidget {
     );
   }
 }
-
 class _MainMenuView extends StatelessWidget {
   const _MainMenuView();
 

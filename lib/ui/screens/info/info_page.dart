@@ -297,8 +297,8 @@ const _items = <(_CandyAsset, String, String)>[
   (
     _CandyAsset(
       AppImages.candyPurple,
-    ), // Якщо “PUPLE” — можливо це дублікат / помилка, але я додам “PURPLE 2”
-    'PURPLE 2\nCANDY',
+    ),
+    'PUPLE 2\nCANDY',
     'One interesting fact is that purple candies often taste of berries, but their rich color has long been linked to royalty.',
   ),
 ];

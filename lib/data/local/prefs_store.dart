@@ -1,9 +1,5 @@
-// path: lib/data/local/prefs_store.dart
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// SharedPreferences-backed key-value storage for app state.
-/// Spec keys: `best_score` (int), `isDialogueCompleted` (bool).
-/// Defaults: best_score=0, isDialogueCompleted=false. :contentReference[oaicite:0]{index=0} :contentReference[oaicite:1]{index=1}
 final class PrefsStore {
   PrefsStore({SharedPreferences? prefs}) : _prefsAsync = _init(prefs);
 

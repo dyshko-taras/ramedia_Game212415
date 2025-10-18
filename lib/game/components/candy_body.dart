@@ -19,16 +19,19 @@ class CandyBody extends BodyComponent with ContactCallbacks {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    final img = await game.images.load(type.asset); // images.prefix = ''
+    final img = await game.images.load(type.asset);
     final radiusMeters = PhysicsScale.px2w(type.radiusPx);
     sprite = SpriteComponent(
       sprite: Sprite(img),
       size: Vector2.all(radiusMeters * 2), // meters
       anchor: Anchor.center,
     );
-    sprite!.position = Vector2.zero(); // фіксуємо позицію відносно тіла
+    sprite!.position = Vector2.zero();
     add(sprite!);
-    if (_pendingPop) { _pendingPop = false; _playPopEffect(); }
+    if (_pendingPop) {
+      _pendingPop = false;
+      await _playPopEffect();
+    }
   }
 
   @override
@@ -36,7 +39,6 @@ class CandyBody extends BodyComponent with ContactCallbacks {
     final shape = CircleShape()..radius = PhysicsScale.px2w(type.radiusPx);
     final fd = FixtureDef(
       shape,
-      density: 1.0,
       restitution: type.restitution,
       friction: type.friction,
     );
@@ -46,23 +48,21 @@ class CandyBody extends BodyComponent with ContactCallbacks {
       linearDamping: type.linearDamping,
       angularDamping: type.angularDamping,
     );
-    final b = world.createBody(bd);
-    b.userData = this;
-    final fixture = b.createFixture(fd);
-    fixture.userData = this;
+    final b = world.createBody(bd)..userData = this;
+    final fixture = b.createFixture(fd)..userData = this;
     return b;
   }
 
-  void pop() {
+  Future<void> pop() async {
     if (sprite == null || !sprite!.isMounted) {
       _pendingPop = true;
       return;
     }
-    _playPopEffect();
+    await _playPopEffect();
   }
 
-  void _playPopEffect() {
-    sprite!.add(
+  Future<void> _playPopEffect() async {
+    await sprite!.add(
       ScaleEffect.to(
         Vector2.all(1.1),
         EffectController(duration: 0.08, alternate: true, repeatCount: 2),
@@ -83,12 +83,10 @@ class CandyBody extends BodyComponent with ContactCallbacks {
     }
   }
 
-@override
+  @override
   void beginContact(Object other, Contact contact) {
     if (other is! CandyBody || other.type != type) return;
-    if (!contact.isTouching()) return; // ← виклик методу
-
-    // дедуп: подію додає лише "молодший" за identityHashCode
+    if (!contact.isTouching()) return;
 
     final wm = WorldManifold();
     contact.getWorldManifold(wm);
@@ -98,12 +96,4 @@ class CandyBody extends BodyComponent with ContactCallbacks {
         : (body.position + other.body.position) / 2;
     onSameTypeContact?.call(other, at);
   }
-
 }
-
-
-
-
-
-
-

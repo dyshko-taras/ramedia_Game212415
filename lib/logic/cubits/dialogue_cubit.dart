@@ -16,16 +16,10 @@ class DialogueState extends Equatable {
          'currentIndex must be within [0, totalSteps) unless completed',
        );
 
-  /// Zero-based index of the current step.
   final int currentIndex;
-
-  /// Total number of steps in the dialogue flow.
   final int totalSteps;
-
-  /// Whether the dialogue has been fully completed.
   final bool completed;
 
-  /// Convenience: progress in [0, 1].
   double get progress =>
       completed ? 1.0 : (currentIndex / totalSteps).clamp(0.0, 1.0);
 
@@ -45,8 +39,6 @@ class DialogueState extends Equatable {
   List<Object?> get props => <Object?>[currentIndex, totalSteps, completed];
 }
 
-/// Controls a simple step-based dialogue/tutorial flow.
-/// On completion, persists `isDialogueCompleted = true` via repository.
 final class DialogueCubit extends Cubit<DialogueState> {
   DialogueCubit({
     required CandyRepository repository,
@@ -62,7 +54,6 @@ final class DialogueCubit extends Cubit<DialogueState> {
 
   final CandyRepository _repo;
 
-  /// Advance to the next step. If at the last step, completes the dialogue.
   Future<void> next() async {
     if (state.completed) return;
 
@@ -76,13 +67,11 @@ final class DialogueCubit extends Cubit<DialogueState> {
     }
   }
 
-  /// Jump to completion immediately (e.g., user skips tutorial).
   Future<void> skip() async {
     if (state.completed) return;
     await _complete();
   }
 
-  /// Reset the dialogue to the first step (runtime only; does not clear persisted flag).
   void reset() {
     emit(state.copyWith(currentIndex: 0, completed: false));
   }

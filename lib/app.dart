@@ -1,7 +1,7 @@
 // lib/app.dart
 import 'package:code/constants/app_routes.dart';
 import 'package:code/data/local/prefs_store.dart';
-import 'package:code/data/repositories/candy_repository.dart'; // <-- імпорт репо
+import 'package:code/data/repositories/candy_repository.dart'; 
 import 'package:code/ui/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

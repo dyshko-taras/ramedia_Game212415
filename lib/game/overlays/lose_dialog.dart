@@ -26,7 +26,7 @@ class LoseDialog extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const BalooText(
-                  'YOU LOSE!', // виправлено орфографію
+                  'YOU LOSE!',
                   size: BalooSize.button32,
                   color: AppColors.white,
                   shadow: true,
@@ -34,7 +34,34 @@ class LoseDialog extends StatelessWidget {
                 Space.vM,
                 GestureDetector(
                   onTap: onRetry,
-                  child: Image.asset(AppImages.btnLarge, fit: BoxFit.contain),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Image.asset(AppImages.btnMedium, scale: 2,),
+                      const BalooText(
+                        'RETRY',
+                        size: BalooSize.dialog24,
+                        color: AppColors.white,
+                        shadow: true,
+                      ),
+                    ],
+                  ),
+                ),
+                Space.vM,
+                GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Image.asset(AppImages.btnMedium, scale: 2,),
+                      const BalooText(
+                        'EXIT',
+                        size: BalooSize.dialog24,
+                        color: AppColors.white,
+                        shadow: true,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),

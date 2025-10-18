@@ -18,37 +18,29 @@ enum CandyType {
   final double radiusPx;
   final int score;
 
-  // Radius in world meters (Forge2D). We convert from design px via PhysicsScale.
   double get radiusWorld => PhysicsScale.px2w(radiusPx);
   double get radiusMeters => PhysicsScale.px2w(radiusPx);
 
-  // Suggested physics parameters per level for more stable stacking.
-  // These are tuned for a Suika-like feel.
   double get restitution {
-    // Slightly less bounce for larger candies.
     final t = (radiusPx - 26) / (152 - 26); // 0..1
     return (0.04 - 0.02 * t).clamp(0.01, 0.05);
   }
 
   double get friction {
-    // Slightly higher friction for larger candies.
     final t = (radiusPx - 26) / (152 - 26);
     return (0.35 + 0.20 * t).clamp(0.35, 0.55);
   }
 
   double get linearDamping {
-    return 0.02; // mild global damping
+    return 0.02;
   }
 
   double get angularDamping {
-    // Larger candies lose spin a bit faster
     final t = (radiusPx - 26) / (152 - 26);
     return (0.04 + 0.06 * t).clamp(0.04, 0.10);
   }
 
   double get angularVelocityCap {
-    // Cap angular velocity stronger for large candies to prevent stack chaos.
-    // Small ~6 rad/s, Large ~2 rad/s
     final t = (radiusPx - 26) / (152 - 26);
     return (6.0 - 4.0 * t).clamp(2.0, 6.0);
   }

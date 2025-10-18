@@ -2,7 +2,6 @@
 import 'package:code/constants/app_images.dart';
 import 'package:code/game/components/candy_body.dart';
 import 'package:code/game/components/game_frame_bounds.dart';
-import 'package:code/game/components/top_line_sensor_body.dart';
 import 'package:code/game/core/physics_scale.dart';
 import 'package:code/logic/cubits/game_cubit.dart';
 import 'package:flame/components.dart';
@@ -17,7 +16,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class CandyGame extends Forge2DGame with HasCollisionDetection, TapCallbacks {
   // px above frame
 
-  CandyGame() : super(zoom: PhysicsScale.pxPerWorld, gravity: Vector2(0, 20), camera: CameraComponent.withFixedResolution(width: screenW, height: screenH));
+  CandyGame()
+    : super(
+        zoom: PhysicsScale.pxPerWorld,
+        gravity: Vector2(0, 20),
+        camera: CameraComponent.withFixedResolution(
+          width: screenW,
+          height: screenH,
+        ),
+      );
   // Debug switches
   static const bool kDebugMerges = false;
   static const double screenW = 393; // px
@@ -45,6 +52,9 @@ class CandyGame extends Forge2DGame with HasCollisionDetection, TapCallbacks {
   final Set<String> _mergeGate = <String>{};
   DateTime? _lastSpawnAt;
   static const Duration _spawnCooldown = Duration(milliseconds: 400);
+  // Coordinate-based exceed detection
+  static const Duration _topExceedGrace = Duration(milliseconds: 800);
+  final Map<int, DateTime> _exceedStartById = <int, DateTime>{};
 
   @override
   Future<void> onLoad() async {
@@ -63,7 +73,10 @@ class CandyGame extends Forge2DGame with HasCollisionDetection, TapCallbacks {
     // Visuals: frame (sizes/positions in METERS = px / zoom)
     final frame = SpriteComponent()
       ..sprite = await loadSprite(AppImages.gameFrame)
-      ..size = Vector2(frameW / PhysicsScale.pxPerWorld, frameH / PhysicsScale.pxPerWorld)
+      ..size = Vector2(
+        frameW / PhysicsScale.pxPerWorld,
+        frameH / PhysicsScale.pxPerWorld,
+      )
       ..anchor = Anchor.topLeft
       ..position = Vector2(
         frameLeft / PhysicsScale.pxPerWorld,
@@ -75,7 +88,10 @@ class CandyGame extends Forge2DGame with HasCollisionDetection, TapCallbacks {
     _topLineYPx = topLineY;
     final topLine = SpriteComponent()
       ..sprite = await loadSprite(AppImages.topLine)
-      ..size = Vector2(screenW / PhysicsScale.pxPerWorld, topLineH / PhysicsScale.pxPerWorld)
+      ..size = Vector2(
+        screenW / PhysicsScale.pxPerWorld,
+        topLineH / PhysicsScale.pxPerWorld,
+      )
       ..anchor = Anchor.topLeft
       ..position = Vector2(0, topLineY / PhysicsScale.pxPerWorld);
 
@@ -83,14 +99,10 @@ class CandyGame extends Forge2DGame with HasCollisionDetection, TapCallbacks {
 
     // Physics bodies
     await world.add(GameFrameBounds.fromPxRect(frameRect));
-    await world.add(
-      TopLineSensorBody(leftPx: 0, rightPx: screenW, yPx: topLineY)
-        ..onExceeded = () => cubit.markLose(),
-    );
   }
 
   @override
-  void onTapDown(TapDownEvent event) {
+  Future<void> onTapDown(TapDownEvent event) async {
     final now = DateTime.now();
     if (_lastSpawnAt != null &&
         now.difference(_lastSpawnAt!) < _spawnCooldown) {
@@ -114,14 +126,9 @@ class CandyGame extends Forge2DGame with HasCollisionDetection, TapCallbacks {
       final key = idA < idB ? '$idA-$idB' : '$idB-$idA';
       if (_mergeGate.contains(key)) return;
       _mergeGate.add(key);
-      if (kDebugMerges) {
-        print(
-          '[MERGE-QUEUE] types=${body.type} & ${other.type} key=$key at(m)=$atMeters',
-        );
-      }
       _merges.add(_MergeEvent(a: body, b: other, atMeters: atMeters));
     };
-    world.add(body);
+    await world.add(body);
     cubit.rollNext();
     _lastSpawnAt = now;
   }
@@ -129,36 +136,54 @@ class CandyGame extends Forge2DGame with HasCollisionDetection, TapCallbacks {
   @override
   void update(double dt) {
     super.update(dt);
+
+    // 1) Process pending merges
     while (_merges.isNotEmpty) {
       final e = _merges.removeLast();
       if (!e.a.isMounted || !e.b.isMounted) continue;
       if (e.a.type != e.b.type) continue;
-
       final next = e.a.type.nextOrNull;
       e.a.removeFromParent();
       e.b.removeFromParent();
-
       if (next == null) {
         cubit.markWin();
       } else {
         final posPx = PhysicsScale.w2pxVec(e.atMeters);
         final merged = CandyBody(type: next, positionPx: posPx);
-        // rewire handler so further merges work
         merged.onSameTypeContact = (other, atM) {
           final idA = identityHashCode(merged);
           final idB = identityHashCode(other);
-          final key = idA < idB ? '$idA-$idB' : '$idB-$idA';
+          final key = idA < idB ? "$idA-$idB" : "$idB-$idA";
           if (_mergeGate.contains(key)) return;
           _mergeGate.add(key);
           _merges.add(_MergeEvent(a: merged, b: other, atMeters: atM));
         };
-        if (kDebugMerges) {
-          print('[MERGE-SPAWN] newType=$next at(px)=$posPx');
-        }
         world.add(merged..pop());
         cubit.addPoints(next.score);
       }
     }
+
+    // 2) Coordinate-based top-line exceed detection with grace
+    final now = DateTime.now();
+    for (final c in world.children.whereType<CandyBody>()) {
+      if (!c.isMounted) continue;
+      final centerYPx = PhysicsScale.w2px(c.body.position.y);
+      final topPx = centerYPx - c.type.radiusPx;
+      if (topPx <= _topLineYPx) {
+        final id = identityHashCode(c);
+        final started = _exceedStartById[id];
+        if (started == null) {
+          _exceedStartById[id] = now;
+        } else if (now.difference(started) >= _topExceedGrace) {
+          _exceedStartById.clear();
+          cubit.markLose();
+          break;
+        }
+      } else {
+        _exceedStartById.remove(identityHashCode(c));
+      }
+    }
+
     _mergeGate.clear();
   }
 }
@@ -169,4 +194,3 @@ class _MergeEvent {
   final CandyBody b;
   final Vector2 atMeters;
 }
-

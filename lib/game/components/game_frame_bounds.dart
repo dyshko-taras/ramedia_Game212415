@@ -22,29 +22,28 @@ class GameFrameBounds extends BodyComponent {
 
   @override
   Body createBody() {
-    final body = world.createBody(BodyDef());
-
-    // Left wall
-    body.createFixtureFromShape(
-      EdgeShape()..set(
-        Vector2(_rectWorld.left, _rectWorld.top),
-        Vector2(_rectWorld.left, _rectWorld.bottom),
-      ),
-    );
-    // Right wall
-    body.createFixtureFromShape(
-      EdgeShape()..set(
-        Vector2(_rectWorld.right, _rectWorld.top),
-        Vector2(_rectWorld.right, _rectWorld.bottom),
-      ),
-    );
-    // Bottom
-    body.createFixtureFromShape(
-      EdgeShape()..set(
-        Vector2(_rectWorld.left, _rectWorld.bottom),
-        Vector2(_rectWorld.right, _rectWorld.bottom),
-      ),
-    );
+    final body = world.createBody(BodyDef())
+      // Left wall
+      ..createFixtureFromShape(
+        EdgeShape()..set(
+          Vector2(_rectWorld.left, _rectWorld.top),
+          Vector2(_rectWorld.left, _rectWorld.bottom),
+        ),
+      )
+      // Right wall
+      ..createFixtureFromShape(
+        EdgeShape()..set(
+          Vector2(_rectWorld.right, _rectWorld.top),
+          Vector2(_rectWorld.right, _rectWorld.bottom),
+        ),
+      )
+      // Bottom
+      ..createFixtureFromShape(
+        EdgeShape()..set(
+          Vector2(_rectWorld.left, _rectWorld.bottom),
+          Vector2(_rectWorld.right, _rectWorld.bottom),
+        ),
+      );
 
     return body;
   }
