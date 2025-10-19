@@ -303,9 +303,8 @@ class _OutcomeLayer extends StatelessWidget {
             context,
             score: state.currentScore,
             onClaimBonus: () async {
-              // Add bonus, persist best score, and go to Main Menu
-              cubit.addPoints(2500);
-              await cubit.endGame();
+              // Apply bonus to final score and persist best, then go to menu
+              await cubit.finalizeWinWithBonus(2500);
               Navigator.of(context).pop();
               await Navigator.of(
                 context,

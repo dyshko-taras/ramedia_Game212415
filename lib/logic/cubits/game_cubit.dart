@@ -116,6 +116,26 @@ final class GameCubit extends Cubit<GameState> {
     emit(state.copyWith(bestScore: best, isOver: true));
   }
 
+  /// Finalizes a win by applying a bonus to the current score and
+  /// persisting best score accordingly. Works even after markWin() set isOver.
+  Future<void> finalizeWinWithBonus(int bonus) async {
+    final total = state.currentScore + bonus;
+    var best = state.bestScore;
+    if (total > best) {
+      best = total;
+      await _repo.setBestScore(best);
+    }
+    emit(
+      state.copyWith(
+        currentScore: total,
+        bestScore: best,
+        isOver: true,
+        outcome: GameOutcome.win,
+        phase: GameUiPhase.ended,
+      ),
+    );
+  }
+
   /// Starts a new run (keeps best score).
   void resetRun() {
     emit(
