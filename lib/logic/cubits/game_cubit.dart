@@ -124,11 +124,11 @@ final class GameCubit extends Cubit<GameState> {
   /// Picks the next candy to display in HUD/preview.
   void rollNext() {
     // Simple first pass: 70% L0, 30% L1
-    final next = _rnd.nextInt(100) < 70 ? CandyType.level5 : CandyType.level1; //TODO
+    final next = _rnd.nextInt(100) < 70 ? CandyType.level7 : CandyType.level3; //TODO
     emit(state.copyWith(nextCandy: next));
   }
 
-  /// Handles tap from UI surface (393-based coords)
+  /// Handles tap from UI surface (393-based coords) 
   void onTapAt(double x) {
     if (state.isOver) return;
     // First tap starts the session
@@ -139,6 +139,15 @@ final class GameCubit extends Cubit<GameState> {
     emit(state.copyWith(phase: nextPhase, lastTapX: x));
     // Simulate a spawn effect by rolling next
     rollNext();
+  }
+
+  /// Dismisses the hint overlay without relying on a tap position.
+  /// Useful when hint is a full-screen overlay that just needs to close.
+  void dismissHint() {
+    if (state.isOver) return;
+    if (state.phase == GameUiPhase.hint) {
+      emit(state.copyWith(phase: GameUiPhase.playing));
+    }
   }
 
   // ---- Win / Lose dialog control ----
@@ -162,8 +171,14 @@ final class GameCubit extends Cubit<GameState> {
 
   Future<void> markLose() async {
     if (state.isOver) return;
+    var best = state.bestScore;
+    if (state.currentScore > best) {
+      best = state.currentScore;
+      await _repo.setBestScore(best);
+    }
     emit(
       state.copyWith(
+        bestScore: best,
         isOver: true,
         outcome: GameOutcome.lose,
         phase: GameUiPhase.ended,
@@ -177,6 +192,7 @@ final class GameCubit extends Cubit<GameState> {
         isOver: false,
         phase: GameUiPhase.hint,
         currentScore: 0,
+        outcome: null,
       ),
     );
     rollNext();
@@ -188,6 +204,7 @@ final class GameCubit extends Cubit<GameState> {
         isOver: false,
         phase: GameUiPhase.hint,
         currentScore: bonus,
+        outcome: null,
       ),
     );
     rollNext();

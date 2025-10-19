@@ -1,6 +1,8 @@
 // path: lib/logic/cubits/settings_cubit.dart
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:code/data/local/prefs_store.dart';
+import 'package:code/services/audio_service.dart';
 
 /// Settings state: soundOn and hardness (1..5).
 class SettingsState extends Equatable {
@@ -22,9 +24,19 @@ class SettingsState extends Equatable {
 }
 
 class SettingsCubit extends Cubit<SettingsState> {
-  SettingsCubit() : super(const SettingsState(soundOn: true, hardness: 3));
+  SettingsCubit(this._store, this._audio)
+      : super(const SettingsState(soundOn: true, hardness: 3));
 
-  void toggleSound() => emit(state.copyWith(soundOn: !state.soundOn)); //TODO
+  final PrefsStore _store;
+  final AudioService _audio;
+
+  Future<void> load() async {
+    final sound = await _store.getSoundOn();
+    final hard = await _store.getHardness();
+    emit(state.copyWith(soundOn: sound, hardness: hard));
+  }
+
+  void toggleSound() => emit(state.copyWith(soundOn: !state.soundOn));
 
   void setHardness(int value) {
     final v = value.clamp(1, 5);
@@ -32,8 +44,9 @@ class SettingsCubit extends Cubit<SettingsState> {
   }
 
   Future<void> save() async {
-    // TODO
-    // Placeholder for future persistence (e.g., SharedPreferences keys).
-    // Intentionally no-op in this phase per implementation plan scope.
+    await _store.setSoundOn(state.soundOn);
+    await _store.setHardness(state.hardness);
+    // Apply audio immediately
+    await _audio.setEnabled(state.soundOn);
   }
 }

@@ -22,20 +22,31 @@ class LoadingPage extends StatefulWidget {
 
 class _LoadingPageState extends State<LoadingPage> {
   Timer? _ticker;
+  Timer? _minDelayTimer;
+  bool _minDelayDone = false;
+  bool _progressComplete = false;
 
   @override
   void initState() {
     super.initState();
     // Safe: provider lives above this widget (in AppRoutes).
     final c = context.read<LoadingCubit>();
+    // Animate progress roughly ~3 seconds to full (0.01 per 30ms ~ 3s)
     _ticker = Timer.periodic(const Duration(milliseconds: 30), (t) {
-      c.tick(0.02);
+      c.tick(0.01);
+    });
+
+    // Enforce minimum visible duration of 3 seconds
+    _minDelayTimer = Timer(const Duration(seconds: 3), () {
+      _minDelayDone = true;
+      _tryNavigate();
     });
   }
 
   @override
   void dispose() {
     _ticker?.cancel();
+    _minDelayTimer?.cancel();
     super.dispose();
   }
 
@@ -53,10 +64,8 @@ class _LoadingPageState extends State<LoadingPage> {
                 listenWhen: (prev, curr) =>
                     prev.progress < 1.0 && curr.progress >= 1.0,
                 listener: (context, state) async {
-                  _ticker?.cancel();
-                  await Navigator.of(
-                    context,
-                  ).pushReplacementNamed(AppRoutes.mainMenu);
+                  _progressComplete = true;
+                  _tryNavigate();
                 },
                 child: BlocBuilder<LoadingCubit, LoadingState>(
                   builder: (context, state) {
@@ -109,6 +118,17 @@ class _LoadingPageState extends State<LoadingPage> {
         ),
       ),
     );
+  }
+}
+
+extension on _LoadingPageState {
+  void _tryNavigate() {
+    if (!mounted) return;
+    if (_minDelayDone && _progressComplete) {
+      _ticker?.cancel();
+      _minDelayTimer?.cancel();
+      Navigator.of(context).pushReplacementNamed(AppRoutes.mainMenu);
+    }
   }
 }
 

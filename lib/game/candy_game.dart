@@ -52,9 +52,9 @@ class CandyGame extends Forge2DGame with HasCollisionDetection, TapCallbacks {
   final Set<String> _mergeGate = <String>{};
   DateTime? _lastSpawnAt;
   static const Duration _spawnCooldown = Duration(milliseconds: 400);
-  // Coordinate-based exceed detection
-  static const Duration _topExceedGrace = Duration(milliseconds: 800);
-  final Map<int, DateTime> _exceedStartById = <int, DateTime>{};
+  // Boundary exceed grace (must stay outside for a short time)
+  static const Duration _boundaryExceedGrace = Duration(milliseconds: 500);
+  final Map<int, DateTime> _outsideStartById = <int, DateTime>{};
 
   @override
   Future<void> onLoad() async {
@@ -73,27 +73,21 @@ class CandyGame extends Forge2DGame with HasCollisionDetection, TapCallbacks {
     // Visuals: frame (sizes/positions in METERS = px / zoom)
     final frame = SpriteComponent()
       ..sprite = await loadSprite(AppImages.gameFrame)
-      ..size = Vector2(
-        frameW / PhysicsScale.pxPerWorld,
-        frameH / PhysicsScale.pxPerWorld,
-      )
+      ..size = Vector2(frameW, frameH)
       ..anchor = Anchor.topLeft
-      ..position = Vector2(
-        frameLeft / PhysicsScale.pxPerWorld,
-        frameTop / PhysicsScale.pxPerWorld,
-      );
+      ..position = Vector2(frameLeft, frameTop);
 
     // Visuals: top line
-    const topLineY = frameTop - topLineOffsetPx;
+    const topLineY = frameTop - topLineOffsetPx - 50;
     _topLineYPx = topLineY;
     final topLine = SpriteComponent()
       ..sprite = await loadSprite(AppImages.topLine)
       ..size = Vector2(
-        screenW / PhysicsScale.pxPerWorld,
-        topLineH / PhysicsScale.pxPerWorld,
+        screenW,
+        topLineH,
       )
       ..anchor = Anchor.topLeft
-      ..position = Vector2(0, topLineY / PhysicsScale.pxPerWorld);
+      ..position = Vector2(0, topLineY);
 
     await addAll([frame, topLine]);
 
@@ -115,7 +109,7 @@ class CandyGame extends Forge2DGame with HasCollisionDetection, TapCallbacks {
     final rightPx = _frameRectPx.right - radiusPx;
     final xPx = event.localPosition.x;
     final clampedPx = xPx.clamp(leftPx, rightPx);
-    final spawnYPx = _topLineYPx + 10;
+    final spawnYPx = _topLineYPx + 60;
     final body = CandyBody(
       type: next,
       positionPx: Vector2(clampedPx, spawnYPx),
@@ -153,7 +147,7 @@ class CandyGame extends Forge2DGame with HasCollisionDetection, TapCallbacks {
         merged.onSameTypeContact = (other, atM) {
           final idA = identityHashCode(merged);
           final idB = identityHashCode(other);
-          final key = idA < idB ? "$idA-$idB" : "$idB-$idA";
+          final key = idA < idB ? '$idA-$idB' : '$idB-$idA';
           if (_mergeGate.contains(key)) return;
           _mergeGate.add(key);
           _merges.add(_MergeEvent(a: merged, b: other, atMeters: atM));
@@ -163,28 +157,59 @@ class CandyGame extends Forge2DGame with HasCollisionDetection, TapCallbacks {
       }
     }
 
-    // 2) Coordinate-based top-line exceed detection with grace
-    final now = DateTime.now();
+    // 2) Boundary-based lose with grace: a candy fully crosses top line OR fully leaves frame bounds
     for (final c in world.children.whereType<CandyBody>()) {
       if (!c.isMounted) continue;
-      final centerYPx = PhysicsScale.w2px(c.body.position.y);
-      final topPx = centerYPx - c.type.radiusPx;
-      if (topPx <= _topLineYPx) {
-        final id = identityHashCode(c);
-        final started = _exceedStartById[id];
+
+      final centerX = PhysicsScale.w2px(c.body.position.x);
+      final centerY = PhysicsScale.w2px(c.body.position.y);
+      final r = c.type.radiusPx.toDouble();
+
+      final left = centerX - r;
+      final right = centerX + r;
+      final top = centerY - r;
+      final bottom = centerY + r;
+
+      final fullyAboveTopLine = bottom <= _topLineYPx;
+
+      // Fully outside frame rect on any side
+      final outsideFrame = right <= _frameRectPx.left ||
+          left >= _frameRectPx.right ||
+          bottom <= _frameRectPx.top ||
+          top >= _frameRectPx.bottom;
+
+      final fullyOutside = fullyAboveTopLine || outsideFrame;
+      final id = identityHashCode(c);
+      if (fullyOutside) {
+        final now = DateTime.now();
+        final started = _outsideStartById[id];
         if (started == null) {
-          _exceedStartById[id] = now;
-        } else if (now.difference(started) >= _topExceedGrace) {
-          _exceedStartById.clear();
+          _outsideStartById[id] = now;
+        } else if (now.difference(started) >= _boundaryExceedGrace) {
+          _outsideStartById.clear();
           cubit.markLose();
           break;
         }
       } else {
-        _exceedStartById.remove(identityHashCode(c));
+        _outsideStartById.remove(id);
       }
     }
 
     _mergeGate.clear();
+  }
+
+  // Resets transient gameplay state and removes dynamic candies.
+  // Keeps static visuals and frame bounds intact.
+  void reset() {
+    // Remove all candy bodies
+    for (final c in List<CandyBody>.from(world.children.whereType<CandyBody>())) {
+      c.removeFromParent();
+    }
+    // Clear timers/gates/state
+    _merges.clear();
+    _mergeGate.clear();
+    _lastSpawnAt = null;
+    _outsideStartById.clear();
   }
 }
 

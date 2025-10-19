@@ -1,5 +1,6 @@
 // lib/ui/screens/game/game_page.dart
 import 'package:code/constants/app_images.dart';
+import 'package:code/constants/app_routes.dart';
 import 'package:code/game/candy_game.dart';
 import 'package:code/game/model/candy_type.dart';
 import 'package:code/game/overlays/lose_dialog.dart';
@@ -93,25 +94,17 @@ class _TapHintLayer extends StatelessWidget {
       selector: (s) => s.phase,
       builder: (context, phase) {
         if (phase != GameUiPhase.hint) return const SizedBox.shrink();
-        return Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'TAP TO ANY PLACE',
-                style: TextStyle(
-                  fontSize: 24,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Image.asset(
+        return Positioned.fill(
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => context.read<GameCubit>().dismissHint(),
+            child: Center(
+              child: Image.asset(
                 AppImages.tapHintHand,
                 width: 120,
                 fit: BoxFit.contain,
               ),
-            ],
+            ),
           ),
         );
       },
@@ -124,24 +117,42 @@ class _OutcomeLayer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<GameCubit, GameState>(
-      buildWhen: (p, n) =>
-          p.outcome != n.outcome || p.currentScore != n.currentScore,
-      builder: (context, state) {
-        final outcome = state.outcome;
-        if (outcome == null) return const SizedBox.shrink();
-        if (outcome == GameOutcome.win) {
-          return WinDialog(
+    return BlocListener<GameCubit, GameState>(
+      listenWhen: (p, n) => p.outcome != n.outcome && n.outcome != null,
+      listener: (context, state) async {
+        final cubit = context.read<GameCubit>();
+        if (state.outcome == GameOutcome.win) {
+          await showWinDialog(
+            context,
             score: state.currentScore,
-            onClose: () => context.read<GameCubit>().closeDialogAndRestart(),
-            onGetBonus: () =>
-                context.read<GameCubit>().addBonusAndRestart(2500),
+            onClose: () {
+              cubit.closeDialogAndRestart();
+              Navigator.of(context).pop();
+            },
+            onGetBonus: () {
+              cubit.addBonusAndRestart(2500);
+              Navigator.of(context).pop();
+            },
+          );
+        } else if (state.outcome == GameOutcome.lose) {
+          await showLoseDialog(
+            context,
+            onRetry: () async {
+              // Close dialog and restart the entire Game screen
+              Navigator.of(context).pop();
+              await Navigator.of(context)
+                  .pushReplacementNamed(AppRoutes.game);
+            },
+            onExit: () async {
+              // Close dialog and go back to Main Menu
+              Navigator.of(context).pop();
+              await Navigator.of(context)
+                  .pushReplacementNamed(AppRoutes.mainMenu);
+            },
           );
         }
-        return LoseDialog(
-          onRetry: () => context.read<GameCubit>().closeDialogAndRestart(),
-        );
       },
+      child: const SizedBox.shrink(),
     );
   }
 }

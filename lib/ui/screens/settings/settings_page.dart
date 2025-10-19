@@ -14,12 +14,7 @@ class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return BlocProvider<SettingsCubit>(
-      create: (_) => SettingsCubit(),
-      child: const _SettingsView(),
-    );
-  }
+  Widget build(BuildContext context) => const _SettingsView();
 }
 
 class _SettingsView extends StatelessWidget {

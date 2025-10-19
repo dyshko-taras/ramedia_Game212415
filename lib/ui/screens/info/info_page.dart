@@ -1,9 +1,11 @@
 // path: lib/ui/screens/info/info_page.dart
 import 'package:code/constants/app_images.dart';
 import 'package:code/ui/theme/app_spacing.dart';
+import 'package:code/logic/cubits/info_cubit.dart';
 import 'package:code/ui/widgets/common/baloo_text.dart';
 import 'package:code/ui/widgets/common/blur_background.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class InfoPage extends StatefulWidget {
   const InfoPage({super.key});
@@ -89,14 +91,18 @@ class _InfoPageState extends State<InfoPage> {
                                   children: [
                                     // Scrollable list
                                     Expanded(
-                                      child: ListView.separated(
-                                        controller: _controller,
-                                        padding: EdgeInsets.zero,
-                                        itemBuilder: (_, i) => _InfoItem(
-                                          data: _items[i],
-                                        ),
-                                        separatorBuilder: (_, _) => Space.vL,
-                                        itemCount: _items.length,
+                                      child: BlocBuilder<InfoCubit, InfoState>(
+                                        builder: (context, state) {
+                                          return ListView.separated(
+                                            controller: _controller,
+                                            padding: EdgeInsets.zero,
+                                            itemBuilder: (_, i) => _InfoItem(
+                                              item: state.items[i],
+                                            ),
+                                            separatorBuilder: (_, __) => Space.vL,
+                                            itemCount: state.items.length,
+                                          );
+                                        },
                                       ),
                                     ),
                                     Space.hL,
@@ -205,14 +211,12 @@ class _BackButton extends StatelessWidget {
 }
 
 class _InfoItem extends StatelessWidget {
-  const _InfoItem({required this.data});
+  const _InfoItem({required this.item});
 
-  final (_CandyAsset, String, String) data;
+  final InfoItem item;
 
   @override
   Widget build(BuildContext context) {
-    final (icon, title, body) = data;
-
     return Column(
       children: [
         Row(
@@ -226,7 +230,7 @@ class _InfoItem extends StatelessWidget {
                   height: 60,
                 ),
                 Image.asset(
-                  icon.path,
+                  item.imagePath,
                   width: 48,
                   height: 48,
                 ),
@@ -234,13 +238,16 @@ class _InfoItem extends StatelessWidget {
             ),
             Space.hS,
             BalooText(
-              title,
+              item.title,
               size: BalooSize.caption20,
               shadow: true,
             ),
           ],
         ),
-        Text(body, style: Theme.of(context).textTheme.bodySmall),
+        Text(
+          item.description,
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
       ],
     );
   }
@@ -298,7 +305,7 @@ const _items = <(_CandyAsset, String, String)>[
     _CandyAsset(
       AppImages.candyPurple,
     ),
-    'PUPLE 2\nCANDY',
+    'PUPLE \nCANDY',
     'One interesting fact is that purple candies often taste of berries, but their rich color has long been linked to royalty.',
   ),
 ];

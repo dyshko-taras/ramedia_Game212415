@@ -22,6 +22,8 @@ class GameFrameBounds extends BodyComponent {
 
   @override
   Body createBody() {
+    renderBody = false;
+
     final body = world.createBody(BodyDef())
       // Left wall
       ..createFixtureFromShape(

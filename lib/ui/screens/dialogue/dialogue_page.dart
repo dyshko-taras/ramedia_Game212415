@@ -1,6 +1,5 @@
 import 'package:code/constants/app_images.dart';
 import 'package:code/constants/app_routes.dart';
-import 'package:code/data/repositories/candy_repository.dart';
 import 'package:code/logic/cubits/dialogue_cubit.dart';
 import 'package:code/ui/widgets/common/baloo_text.dart';
 import 'package:code/ui/widgets/common/small_pill_button.dart';
@@ -12,16 +11,7 @@ class DialoguePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<DialogueCubit>(
-      create: (context) {
-        final candyRepo = context.read<CandyRepository>();
-        return DialogueCubit(
-          repository: candyRepo,
-          totalSteps: 4,
-        );
-      },
-      child: const _DialogueView(),
-    );
+    return const _DialogueView();
   }
 }
 
@@ -184,3 +174,4 @@ class _NextButton extends StatelessWidget {
     );
   }
 }
+

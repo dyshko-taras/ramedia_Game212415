@@ -18,108 +18,112 @@ class WinDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(24),
-          child: Image.asset(AppImages.dialogWin, fit: BoxFit.contain),
-        ),
-        Positioned(
-          top: 60,
-          right: 60,
-          child: GestureDetector(
-            onTap: onClose,
-            child: Stack(
-              alignment: Alignment.center,
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Panel background
+          Image.asset(AppImages.dialogWin, fit: BoxFit.contain),
+          // Close button (X)
+          Positioned(
+            top: 20,
+            right: 20,
+            child: GestureDetector(
+              onTap: onClose,
+              child: Image.asset(AppImages.btnClose, scale: 2),
+            ),
+          ),
+          // Content
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 40),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Image.asset(
-                  AppImages.btnClose,
-                  scale: 2,
+                const BalooText(
+                  'RECORD SCORE:',
+                  size: BalooSize.dialogLong14,
+                ),
+                Space.vS,
+                BalooText(
+                  '$score',
+                  size: BalooSize.button32,
+                ),
+                Space.vS,
+                const BalooText(
+                  'YOUR BONUS',
+                  size: BalooSize.button32,
+                  color: AppColors.white,
+                  shadow: true,
+                ),
+                Space.vS,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const BalooText(
+                      '2500',
+                      size: BalooSize.button32,
+                      shadow: true,
+                    ),
+                    Space.hS,
+                    Image.asset(AppImages.iconStar, scale: 2),
+                  ],
+                ),
+                Space.vS,
+                GestureDetector(
+                  onTap: onGetBonus,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Image.asset(AppImages.btnMedium, scale: 2),
+                      const BalooText(
+                        'GET BONUS',
+                        size: BalooSize.dialog24,
+                        color: AppColors.white,
+                        shadow: true,
+                      ),
+                    ],
+                  ),
+                ),
+                Space.vS,
+                GestureDetector(
+                  onTap: onClose,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Image.asset(AppImages.btnMedium, scale: 2),
+                      const BalooText(
+                        'EXIT',
+                        size: BalooSize.dialog24,
+                        color: AppColors.white,
+                        shadow: true,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 40),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const BalooText(
-                'RECORD SCORE:',
-                size: BalooSize.dialogLong14,
-              ),
-              Space.vS,
-              BalooText(
-                '$score',
-                size: BalooSize.button32,
-              ),
-              Space.vS,
-              const BalooText(
-                'YOUR BONUS',
-                size: BalooSize.button32,
-                color: AppColors.white,
-                shadow: true,
-              ),
-              Space.vS,
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const BalooText(
-                    '2500',
-                    size: BalooSize.button32,
-                    shadow: true,
-                  ),
-                  Space.hS,
-                  Image.asset(
-                    AppImages.iconStar,
-                    scale: 2,
-                  ),
-                ],
-              ),
-              Space.vS,
-              GestureDetector(
-                onTap: onGetBonus,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Image.asset(
-                      AppImages.btnMedium,
-                      scale: 2,
-                    ),
-                    const BalooText(
-                      'GET BONUS',
-                      size: BalooSize.dialog24,
-                      color: AppColors.white,
-                      shadow: true,
-                    ),
-                  ],
-                ),
-              ),
-              Space.vS,
-              GestureDetector(
-                onTap: onClose,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Image.asset(
-                      AppImages.btnMedium,
-                      scale: 2,
-                    ),
-                    const BalooText(
-                      'EXIT',
-                      size: BalooSize.dialog24,
-                      color: AppColors.white,
-                      shadow: true,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
+}
+
+Future<void> showWinDialog(
+  BuildContext context, {
+  required int score,
+  required VoidCallback onClose,
+  required VoidCallback onGetBonus,
+}) {
+  return showDialog<void>(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => WinDialog(
+      score: score,
+      onClose: onClose,
+      onGetBonus: onGetBonus,
+    ),
+  );
 }

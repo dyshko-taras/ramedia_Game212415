@@ -3,7 +3,6 @@
 
 import 'package:code/constants/app_images.dart';
 import 'package:code/constants/app_routes.dart';
-import 'package:code/data/repositories/candy_repository.dart';
 import 'package:code/logic/cubits/main_menu_cubit.dart';
 import 'package:code/ui/theme/app_colors.dart';
 import 'package:code/ui/theme/app_spacing.dart';
@@ -18,11 +17,7 @@ class MainMenuPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<MainMenuCubit>(
-      create: (context) =>
-          MainMenuCubit(context.read<CandyRepository>())..loadBestScore(),
-      child: const _MainMenuView(),
-    );
+    return const _MainMenuView();
   }
 }
 class _MainMenuView extends StatelessWidget {
@@ -116,3 +111,4 @@ class _ScoreBanner extends StatelessWidget {
     );
   }
 }
+

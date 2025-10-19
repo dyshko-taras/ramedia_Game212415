@@ -19,6 +19,7 @@ class CandyBody extends BodyComponent with ContactCallbacks {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
+    renderBody = true ;
     final img = await game.images.load(type.asset);
     final radiusMeters = PhysicsScale.px2w(type.radiusPx);
     sprite = SpriteComponent(

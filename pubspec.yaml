@@ -18,6 +18,7 @@ dependencies:
   meta: ^1.16.0
   flame: ^1.32.0
   flame_forge2d: ^0.19.2
+  flame_audio: ^2.11.10
 
 dev_dependencies:
   flutter_test:
@@ -31,6 +32,7 @@ flutter:
   assets:
     - assets/icons/
     - assets/images/
+    - assets/audio/
     - assets/
   fonts:
     - family: Baloo
