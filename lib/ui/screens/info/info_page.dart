@@ -1,7 +1,7 @@
 // path: lib/ui/screens/info/info_page.dart
 import 'package:code/constants/app_images.dart';
-import 'package:code/ui/theme/app_spacing.dart';
 import 'package:code/logic/cubits/info_cubit.dart';
+import 'package:code/ui/theme/app_spacing.dart';
 import 'package:code/ui/widgets/common/baloo_text.dart';
 import 'package:code/ui/widgets/common/blur_background.dart';
 import 'package:flutter/material.dart';
@@ -99,7 +99,8 @@ class _InfoPageState extends State<InfoPage> {
                                             itemBuilder: (_, i) => _InfoItem(
                                               item: state.items[i],
                                             ),
-                                            separatorBuilder: (_, __) => Space.vL,
+                                            separatorBuilder: (_, _) =>
+                                                Space.vL,
                                             itemCount: state.items.length,
                                           );
                                         },
@@ -251,66 +252,4 @@ class _InfoItem extends StatelessWidget {
       ],
     );
   }
-}
-
-const _items = <(_CandyAsset, String, String)>[
-  (
-    _CandyAsset(AppImages.candyBlueSwirl),
-    'BLUE SWIRL\nCANDY',
-    'One interesting fact is that its ocean-like waves symbolize endless sweetness, making it feel like diving into a sea of sugar.',
-  ),
-  (
-    _CandyAsset(AppImages.candyPinkSwirl),
-    'PINK SWIRL\nCANDY',
-    'One interesting fact is that giant pink swirls were once carnival classics, crafted to look as fun as they taste.',
-  ),
-  (
-    _CandyAsset(AppImages.candySkyBlue),
-    'SKY BLUE\nCANDY',
-    'One interesting fact is that blue sweets often trick your taste buds — many are raspberry-flavored, not blueberry.',
-  ),
-
-  // Нові пункти:
-  (
-    _CandyAsset(AppImages.candyGreen),
-    'GREEN\nCANDY',
-    'One interesting fact is that green candies are often minty or lime-flavored, refreshing and energizing with every bite.',
-  ),
-  (
-    _CandyAsset(AppImages.candyPurple),
-    'PURPLE\nCANDY',
-    'One interesting fact is that spiral designs are made to catch the eye, promising endless fun and flavor.',
-  ),
-  (
-    _CandyAsset(AppImages.candyCool),
-    'COOL\nCANDY',
-    'One interesting fact is that pink treats became popular because their playful color is linked with joy and celebration.',
-  ),
-  (
-    _CandyAsset(AppImages.candyTurquoise),
-    'TURQUOISE\nCANDY',
-    'One interesting fact is that rare candy shades like turquoise were made to stand out, shining like hidden gems in a candy shop.',
-  ),
-  (
-    _CandyAsset(AppImages.candyYellow),
-    'YELLOW\nCANDY',
-    'One interesting fact is that yellow sweets add a zingy lemon kick, balancing sugar rush with tangy freshness.',
-  ),
-  (
-    _CandyAsset(AppImages.candyRed),
-    'RED\nCANDY',
-    'One interesting fact is that red candies symbolize love and passion, often being the very first flavor to sell out.',
-  ),
-  (
-    _CandyAsset(
-      AppImages.candyPurple,
-    ),
-    'PUPLE \nCANDY',
-    'One interesting fact is that purple candies often taste of berries, but their rich color has long been linked to royalty.',
-  ),
-];
-
-class _CandyAsset {
-  const _CandyAsset(this.path);
-  final String path;
 }

@@ -7,14 +7,12 @@ import 'package:flutter/material.dart';
 class WinDialog extends StatelessWidget {
   const WinDialog({
     required this.score,
-    required this.onClose,
-    required this.onGetBonus,
+    required this.onClaimBonus,
     super.key,
   });
 
   final int score;
-  final VoidCallback onClose;
-  final VoidCallback onGetBonus;
+  final VoidCallback onClaimBonus;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +29,7 @@ class WinDialog extends StatelessWidget {
             top: 20,
             right: 20,
             child: GestureDetector(
-              onTap: onClose,
+              onTap: onClaimBonus,
               child: Image.asset(AppImages.btnClose, scale: 2),
             ),
           ),
@@ -72,29 +70,13 @@ class WinDialog extends StatelessWidget {
                 ),
                 Space.vS,
                 GestureDetector(
-                  onTap: onGetBonus,
+                  onTap: onClaimBonus,
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
                       Image.asset(AppImages.btnMedium, scale: 2),
                       const BalooText(
                         'GET BONUS',
-                        size: BalooSize.dialog24,
-                        color: AppColors.white,
-                        shadow: true,
-                      ),
-                    ],
-                  ),
-                ),
-                Space.vS,
-                GestureDetector(
-                  onTap: onClose,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Image.asset(AppImages.btnMedium, scale: 2),
-                      const BalooText(
-                        'EXIT',
                         size: BalooSize.dialog24,
                         color: AppColors.white,
                         shadow: true,
@@ -114,16 +96,12 @@ class WinDialog extends StatelessWidget {
 Future<void> showWinDialog(
   BuildContext context, {
   required int score,
-  required VoidCallback onClose,
-  required VoidCallback onGetBonus,
+  required VoidCallback onClaimBonus,
 }) {
   return showDialog<void>(
     context: context,
     barrierDismissible: false,
-    builder: (_) => WinDialog(
-      score: score,
-      onClose: onClose,
-      onGetBonus: onGetBonus,
-    ),
+    barrierColor: Colors.white24,
+    builder: (_) => WinDialog(score: score, onClaimBonus: onClaimBonus),
   );
 }

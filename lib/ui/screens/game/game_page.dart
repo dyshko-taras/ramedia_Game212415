@@ -35,50 +35,227 @@ class _GamePageState extends State<GamePage> {
       sigma: 0,
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        body: ScaledGameView(
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTapDown: (d) =>
-                context.read<GameCubit>().onTapAt(d.localPosition.dx),
-            child: Stack(
-              children: [
-                // Game canvas (Flame)
-                GameWidget(
-                  game: _game,
-                  backgroundBuilder: (_) => const SizedBox.shrink(),
+        body: Stack(
+          children: [
+            ScaledGameView(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTapDown: (d) =>
+                    context.read<GameCubit>().onTapAt(d.localPosition.dx),
+                child: Stack(
+                  children: [
+                    // Game canvas (Flame)
+                    GameWidget(
+                      game: _game,
+                      backgroundBuilder: (_) => const SizedBox.shrink(),
+                    ),
+                    // For now, show only HUD driven by GameCubit (no GameWidget)
+                    const TopHud(),
+
+                    // Tap hint layer (centered)
+                    const _TapHintLayer(),
+
+                    // Win / Lose dialogs driven by cubit
+                    const _OutcomeLayer(),
+
+                    // Bottom palette (decor only)
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: SizedBox(
+                        width: 320,
+                        height: 186,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Image.asset(
+                              AppImages.candiesBar,
+                              fit: BoxFit.contain,
+                            ),
+                            const _PaletteIconsRow(),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    // No game outcome overlays for now
+                  ],
                 ),
-                // For now, show only HUD driven by GameCubit (no GameWidget)
-                const TopHud(),
+              ),
+            ),
+            const _CharacterPeekLayer(),
+            const _LoseSequenceLayer(),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
-                // Tap hint layer (centered)
-                const _TapHintLayer(),
+class _CharacterPeekLayer extends StatefulWidget {
+  const _CharacterPeekLayer();
 
-                // Win / Lose dialogs driven by cubit
-                const _OutcomeLayer(),
+  @override
+  State<_CharacterPeekLayer> createState() => _CharacterPeekLayerState();
+}
 
-                // Bottom palette (decor only)
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: SizedBox(
-                    width: 320,
-                    height: 186,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Image.asset(
-                          AppImages.candiesBar,
+class _CharacterPeekLayerState extends State<_CharacterPeekLayer>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    )..addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Listen for merge events (mergeSeq increments) to trigger animation.
+    // Ensure we don't restart while animating.
+    return Positioned(
+      // Layout parameters for slide-in/out from left
+      top: 120,
+      width: 240,
+      left: _computeLeft(),
+      child: BlocListener<GameCubit, GameState>(
+        listenWhen: (p, n) => p.mergeSeq != n.mergeSeq,
+        listener: (context, state) {
+          if (!_controller.isAnimating) {
+            _controller.forward(from: 0);
+          }
+        },
+        child: const IgnorePointer(
+          child: _CharacterImage(),
+        ),
+      ),
+    );
+  }
+
+  double _computeLeft() {
+    const hiddenLeft = -240; // fully outside
+    const shownLeft = -20; // peek inside a bit
+    final t = _controller.value;
+    double progress;
+    if (t < 0.5) {
+      progress = t * 2; // 0..1 slide in
+    } else {
+      progress = 1 - (t - 0.5) * 2; // 1..0 slide out
+    }
+    return hiddenLeft + (shownLeft - hiddenLeft) * progress;
+  }
+}
+
+class _CharacterImage extends StatelessWidget {
+  const _CharacterImage();
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset(
+      AppImages.characterLeft,
+      fit: BoxFit.contain,
+    );
+  }
+}
+
+class _LoseSequenceLayer extends StatefulWidget {
+  const _LoseSequenceLayer();
+
+  @override
+  State<_LoseSequenceLayer> createState() => _LoseSequenceLayerState();
+}
+
+class _LoseSequenceLayerState extends State<_LoseSequenceLayer>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  bool _active = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1900),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _runAndShowDialog() async {
+    setState(() => _active = true);
+    try {
+      await _controller.forward(from: 0);
+    } finally {
+      if (!mounted) return;
+      await showLoseDialog(
+        context,
+        onRetry: () async {
+          Navigator.of(context).pop();
+          await Navigator.of(context).pushReplacementNamed(AppRoutes.game);
+        },
+        onExit: () async {
+          Navigator.of(context).pop();
+          await Navigator.of(context).pushReplacementNamed(AppRoutes.mainMenu);
+        },
+      );
+      if (mounted) setState(() => _active = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<GameCubit, GameState>(
+      listenWhen: (p, n) =>
+          p.outcome != n.outcome && n.outcome == GameOutcome.lose,
+      listener: (context, state) {
+        if (!_active) {
+          _runAndShowDialog();
+        }
+      },
+      child: IgnorePointer(
+        ignoring: !_active,
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, _) {
+            if (!_active) return const SizedBox.shrink();
+            final t = _controller.value;
+            final dy = -400 + 400 * t;
+            final angle = t * 6.283185307179586; // 2*pi
+            return Stack(
+              children: [
+                Positioned.fill(
+                  child: Container(color: Colors.black.withOpacity(0.25)),
+                ),
+                Positioned.fill(
+                  child: Center(
+                    child: Transform.translate(
+                      offset: Offset(0, dy),
+                      child: Transform.rotate(
+                        angle: angle,
+                        child: Image.asset(
+                          AppImages.chupachupsBig,
+                          scale: 2,
                           fit: BoxFit.contain,
                         ),
-                        const _PaletteIconsRow(),
-                      ],
+                      ),
                     ),
                   ),
                 ),
-
-                // No game outcome overlays for now
               ],
-            ),
-          ),
+            );
+          },
         ),
       ),
     );
@@ -125,29 +302,14 @@ class _OutcomeLayer extends StatelessWidget {
           await showWinDialog(
             context,
             score: state.currentScore,
-            onClose: () {
-              cubit.closeDialogAndRestart();
+            onClaimBonus: () async {
+              // Add bonus, persist best score, and go to Main Menu
+              cubit.addPoints(2500);
+              await cubit.endGame();
               Navigator.of(context).pop();
-            },
-            onGetBonus: () {
-              cubit.addBonusAndRestart(2500);
-              Navigator.of(context).pop();
-            },
-          );
-        } else if (state.outcome == GameOutcome.lose) {
-          await showLoseDialog(
-            context,
-            onRetry: () async {
-              // Close dialog and restart the entire Game screen
-              Navigator.of(context).pop();
-              await Navigator.of(context)
-                  .pushReplacementNamed(AppRoutes.game);
-            },
-            onExit: () async {
-              // Close dialog and go back to Main Menu
-              Navigator.of(context).pop();
-              await Navigator.of(context)
-                  .pushReplacementNamed(AppRoutes.mainMenu);
+              await Navigator.of(
+                context,
+              ).pushReplacementNamed(AppRoutes.mainMenu);
             },
           );
         }

@@ -29,8 +29,8 @@ class CandyGame extends Forge2DGame with HasCollisionDetection, TapCallbacks {
   static const bool kDebugMerges = false;
   static const double screenW = 393; // px
   static const double screenH = 852; // px
-  static const double frameW = 371; // px
-  static const double frameH = 467; // px
+  static const double frameW = 334; // px
+  static const double frameH = 410; // px
   static const double topLineH = 5; // px
   static const double topLineOffsetPx = 6;
 
@@ -73,9 +73,9 @@ class CandyGame extends Forge2DGame with HasCollisionDetection, TapCallbacks {
     // Visuals: frame (sizes/positions in METERS = px / zoom)
     final frame = SpriteComponent()
       ..sprite = await loadSprite(AppImages.gameFrame)
-      ..size = Vector2(frameW, frameH)
+      ..size = Vector2(372, 467)
       ..anchor = Anchor.topLeft
-      ..position = Vector2(frameLeft, frameTop);
+      ..position = Vector2(frameLeft - 19, frameTop - 28);
 
     // Visuals: top line
     const topLineY = frameTop - topLineOffsetPx - 50;
@@ -154,6 +154,7 @@ class CandyGame extends Forge2DGame with HasCollisionDetection, TapCallbacks {
         };
         world.add(merged..pop());
         cubit.addPoints(next.score);
+        cubit.notifyMerged();
       }
     }
 
@@ -163,7 +164,7 @@ class CandyGame extends Forge2DGame with HasCollisionDetection, TapCallbacks {
 
       final centerX = PhysicsScale.w2px(c.body.position.x);
       final centerY = PhysicsScale.w2px(c.body.position.y);
-      final r = c.type.radiusPx.toDouble();
+      final r = c.type.radiusPx;
 
       final left = centerX - r;
       final right = centerX + r;
@@ -173,7 +174,8 @@ class CandyGame extends Forge2DGame with HasCollisionDetection, TapCallbacks {
       final fullyAboveTopLine = bottom <= _topLineYPx;
 
       // Fully outside frame rect on any side
-      final outsideFrame = right <= _frameRectPx.left ||
+      final outsideFrame =
+          right <= _frameRectPx.left ||
           left >= _frameRectPx.right ||
           bottom <= _frameRectPx.top ||
           top >= _frameRectPx.bottom;
@@ -202,7 +204,9 @@ class CandyGame extends Forge2DGame with HasCollisionDetection, TapCallbacks {
   // Keeps static visuals and frame bounds intact.
   void reset() {
     // Remove all candy bodies
-    for (final c in List<CandyBody>.from(world.children.whereType<CandyBody>())) {
+    for (final c in List<CandyBody>.from(
+      world.children.whereType<CandyBody>(),
+    )) {
       c.removeFromParent();
     }
     // Clear timers/gates/state

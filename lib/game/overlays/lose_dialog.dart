@@ -76,6 +76,7 @@ Future<void> showLoseDialog(
   return showDialog<void>(
     context: context,
     barrierDismissible: false,
+    barrierColor: Colors.white24,
     builder: (_) => LoseDialog(onRetry: onRetry, onExit: onExit),
   );
 }

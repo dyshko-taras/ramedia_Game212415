@@ -90,13 +90,13 @@ class InfoCubit extends Cubit<InfoState> {
         imagePath: AppImages.candyRed,
       ),
       InfoItem(
-        title: 'PUPLE 2\nCANDY',
+        title: 'PUPLE\nCANDY',
         description:
             'One interesting fact is that purple candies often taste of berries, but their rich color has long been linked to royalty.',
-        imagePath: AppImages.candyPurple,
+        imagePath: AppImages.candyPuple,
       ),
     ];
 
-    emit(InfoState(items: items));
+    emit(const InfoState(items: items));
   }
 }

@@ -17,6 +17,7 @@ class GameState extends Equatable {
     required this.isOver,
     required this.nextCandy,
     required this.phase,
+    required this.mergeSeq,
     this.lastTapX,
     this.outcome,
   });
@@ -26,6 +27,7 @@ class GameState extends Equatable {
   final bool isOver;
   final CandyType nextCandy;
   final GameUiPhase phase;
+  final int mergeSeq; // increments on every merge
   final double? lastTapX;
   final GameOutcome? outcome;
 
@@ -35,6 +37,7 @@ class GameState extends Equatable {
     bool? isOver,
     CandyType? nextCandy,
     GameUiPhase? phase,
+    int? mergeSeq,
     double? lastTapX,
     GameOutcome? outcome,
   }) {
@@ -44,6 +47,7 @@ class GameState extends Equatable {
       isOver: isOver ?? this.isOver,
       nextCandy: nextCandy ?? this.nextCandy,
       phase: phase ?? this.phase,
+      mergeSeq: mergeSeq ?? this.mergeSeq,
       lastTapX: lastTapX ?? this.lastTapX,
       outcome: outcome ?? this.outcome,
     );
@@ -56,6 +60,7 @@ class GameState extends Equatable {
     isOver,
     nextCandy,
     phase,
+    mergeSeq,
     lastTapX,
     outcome,
   ];
@@ -71,6 +76,7 @@ final class GameCubit extends Cubit<GameState> {
           isOver: false,
           nextCandy: CandyType.level0,
           phase: GameUiPhase.hint,
+          mergeSeq: 0,
         ),
       );
 
@@ -86,6 +92,7 @@ final class GameCubit extends Cubit<GameState> {
         currentScore: 0,
         isOver: false,
         phase: GameUiPhase.hint,
+        mergeSeq: 0,
       ),
     );
     rollNext();
@@ -124,11 +131,17 @@ final class GameCubit extends Cubit<GameState> {
   /// Picks the next candy to display in HUD/preview.
   void rollNext() {
     // Simple first pass: 70% L0, 30% L1
-    final next = _rnd.nextInt(100) < 70 ? CandyType.level7 : CandyType.level3; //TODO
+    final next = _rnd.nextInt(100) < 70 ? CandyType.level0 : CandyType.level1;
     emit(state.copyWith(nextCandy: next));
   }
 
-  /// Handles tap from UI surface (393-based coords) 
+  /// Signals that a merge has occurred in the game world.
+  void notifyMerged() {
+    if (state.isOver) return;
+    emit(state.copyWith(mergeSeq: state.mergeSeq + 1));
+  }
+
+  /// Handles tap from UI surface (393-based coords)
   void onTapAt(double x) {
     if (state.isOver) return;
     // First tap starts the session
@@ -192,7 +205,6 @@ final class GameCubit extends Cubit<GameState> {
         isOver: false,
         phase: GameUiPhase.hint,
         currentScore: 0,
-        outcome: null,
       ),
     );
     rollNext();
@@ -204,7 +216,6 @@ final class GameCubit extends Cubit<GameState> {
         isOver: false,
         phase: GameUiPhase.hint,
         currentScore: bonus,
-        outcome: null,
       ),
     );
     rollNext();

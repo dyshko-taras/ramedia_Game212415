@@ -162,9 +162,17 @@ class _ProgressBar extends StatelessWidget {
           ),
           ClipRRect(
             borderRadius: BorderRadius.circular(height / 2),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              widthFactor: clamped,
+            child: TweenAnimationBuilder<double>(
+              tween: Tween<double>(begin: 0, end: clamped),
+              duration: const Duration(milliseconds: 400),
+              curve: Curves.easeOut,
+              builder: (context, value, child) {
+                return Align(
+                  alignment: Alignment.centerLeft,
+                  widthFactor: value,
+                  child: child,
+                );
+              },
               child: Image.asset(
                 AppImages.progressFill,
                 scale: 2,

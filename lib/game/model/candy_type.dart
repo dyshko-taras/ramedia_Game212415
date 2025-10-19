@@ -2,16 +2,17 @@ import 'package:code/constants/app_images.dart';
 import 'package:code/game/core/physics_scale.dart';
 
 enum CandyType {
-  level0(AppImages.candyBlueSwirl, 26, 5),
-  level1(AppImages.candyPinkSwirl, 32, 10),
-  level2(AppImages.candySkyBlue, 40, 20),
-  level3(AppImages.candyGreen, 50, 40),
-  level4(AppImages.candyPurple, 62, 80),
-  level5(AppImages.candyCool, 76, 160),
-  level6(AppImages.candyTurquoise, 92, 320),
-  level7(AppImages.candyYellow, 110, 640),
-  level8(AppImages.candyRed, 130, 1280),
-  level9(AppImages.candyPuple, 152, 2560);
+  level0(AppImages.candyBlueSwirl, 13, 2),
+  level1(AppImages.candyPinkSwirl, 16, 5),
+  level2(AppImages.candySkyBlue, 20, 10),
+  level3(AppImages.candyGreen, 25, 20),
+  level4(AppImages.candyPurple, 31, 40),
+  level5(AppImages.candyCool, 38, 80),
+  level6(AppImages.candyTurquoise, 46, 160),
+  level7(AppImages.candyYellow, 55, 320),
+  level8(AppImages.candyRed, 65, 640),
+  level9(AppImages.candyPuple, 76, 1280);
+
 
   const CandyType(this.asset, this.radiusPx, this.score);
   final String asset;
