@@ -114,7 +114,7 @@ class _BubblePanel extends StatelessWidget {
         clipBehavior: Clip.none,
         children: [
           Image.asset(
-            AppImages.dialogueBox,
+            AppImages.dialogLose,
             fit: BoxFit.fill,
             scale: 2,
           ),
@@ -130,8 +130,8 @@ class _BubblePanel extends StatelessWidget {
           ),
 
           Positioned(
-            bottom: -10,
-            right: showGo ? null : 12,
+            bottom: 0,
+            right: showGo ? null : 0,
             child: showGo
                 ? SmallPillButton(
                     label: 'GO',
@@ -174,4 +174,3 @@ class _NextButton extends StatelessWidget {
     );
   }
 }
-

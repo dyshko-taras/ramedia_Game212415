@@ -2,6 +2,7 @@
 import 'package:code/constants/app_images.dart';
 import 'package:code/constants/app_routes.dart';
 import 'package:code/game/candy_game.dart';
+import 'package:code/game/overlays/exit_confirm_dialog.dart';
 import 'package:code/logic/cubits/game_cubit.dart';
 import 'package:code/ui/theme/app_colors.dart';
 import 'package:code/ui/theme/app_spacing.dart';
@@ -98,7 +99,14 @@ class _BackButton extends StatelessWidget {
       label: 'Back',
       child: InkWell(
         onTap: () async {
-          await Navigator.of(context).pushReplacementNamed(AppRoutes.mainMenu);
+          await showExitConfirmationDialog(
+            context,
+            onConfirm: () => Navigator.of(context).pushNamedAndRemoveUntil(
+              AppRoutes.mainMenu,
+              (route) => false,
+            ),
+            onCancel: () => Navigator.of(context).pop(),
+          );
         },
         borderRadius: BorderRadius.circular(size / 2),
         child: Ink(

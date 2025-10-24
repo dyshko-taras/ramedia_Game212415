@@ -1,8 +1,8 @@
 // path: lib/logic/cubits/settings_cubit.dart
-import 'package:equatable/equatable.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:code/data/local/prefs_store.dart';
 import 'package:code/services/audio_service.dart';
+import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// Settings state: soundOn and hardness (1..5).
 class SettingsState extends Equatable {
@@ -25,7 +25,7 @@ class SettingsState extends Equatable {
 
 class SettingsCubit extends Cubit<SettingsState> {
   SettingsCubit(this._store, this._audio)
-      : super(const SettingsState(soundOn: true, hardness: 3));
+    : super(const SettingsState(soundOn: true, hardness: 3));
 
   final PrefsStore _store;
   final AudioService _audio;

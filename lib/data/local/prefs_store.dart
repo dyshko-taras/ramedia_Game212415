@@ -61,4 +61,16 @@ final class PrefsStore {
     final prefs = await _prefsAsync;
     return prefs.getInt(_kHardness) ?? 3; // default 3
   }
+
+  // ---- TAP TO ANY PLACE ----
+  Future<void> setTapToAnyPlace(bool v) async {
+    final prefs = await _prefsAsync;
+    await prefs.setBool('tap_to_any_place', v);
+  }
+
+  Future<bool> getTapToAnyPlace() async {
+    final prefs = await _prefsAsync;
+    return prefs.getBool('tap_to_any_place') ?? false;
+  }
+
 }

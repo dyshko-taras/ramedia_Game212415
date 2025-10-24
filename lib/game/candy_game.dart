@@ -52,6 +52,7 @@ class CandyGame extends Forge2DGame with HasCollisionDetection, TapCallbacks {
   final Set<String> _mergeGate = <String>{};
   DateTime? _lastSpawnAt;
   static const Duration _spawnCooldown = Duration(milliseconds: 400);
+  bool _spawnLocked = false; // protects against re-entrant onTapDown bursts
   // Boundary exceed grace (must stay outside for a short time)
   static const Duration _boundaryExceedGrace = Duration(milliseconds: 500);
   final Map<int, DateTime> _outsideStartById = <int, DateTime>{};
@@ -98,10 +99,13 @@ class CandyGame extends Forge2DGame with HasCollisionDetection, TapCallbacks {
   @override
   Future<void> onTapDown(TapDownEvent event) async {
     final now = DateTime.now();
-    if (_lastSpawnAt != null &&
-        now.difference(_lastSpawnAt!) < _spawnCooldown) {
+    if (_spawnLocked) return;
+    if (_lastSpawnAt != null && now.difference(_lastSpawnAt!) < _spawnCooldown) {
       return;
     }
+    // Set cooldown immediately to avoid multiple spawns if async add() yields
+    _spawnLocked = true;
+    _lastSpawnAt = now;
     // Spawn a Candy based on cubit.nextCandy
     final next = cubit.state.nextCandy;
     final radiusPx = next.radiusPx;
@@ -122,9 +126,12 @@ class CandyGame extends Forge2DGame with HasCollisionDetection, TapCallbacks {
       _mergeGate.add(key);
       _merges.add(_MergeEvent(a: body, b: other, atMeters: atMeters));
     };
-    await world.add(body);
-    cubit.rollNext();
-    _lastSpawnAt = now;
+    try {
+      await world.add(body);
+      cubit.rollNext();
+    } finally {
+      _spawnLocked = false;
+    }
   }
 
   @override

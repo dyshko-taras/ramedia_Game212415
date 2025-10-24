@@ -18,6 +18,7 @@ class GameState extends Equatable {
     required this.nextCandy,
     required this.phase,
     required this.mergeSeq,
+    required this.tapToAnyPlace,
     this.lastTapX,
     this.outcome,
   });
@@ -30,6 +31,7 @@ class GameState extends Equatable {
   final int mergeSeq; // increments on every merge
   final double? lastTapX;
   final GameOutcome? outcome;
+  final bool tapToAnyPlace;
 
   GameState copyWith({
     int? currentScore,
@@ -40,6 +42,7 @@ class GameState extends Equatable {
     int? mergeSeq,
     double? lastTapX,
     GameOutcome? outcome,
+    bool? tapToAnyPlace,
   }) {
     return GameState(
       currentScore: currentScore ?? this.currentScore,
@@ -50,6 +53,7 @@ class GameState extends Equatable {
       mergeSeq: mergeSeq ?? this.mergeSeq,
       lastTapX: lastTapX ?? this.lastTapX,
       outcome: outcome ?? this.outcome,
+      tapToAnyPlace: tapToAnyPlace ?? this.tapToAnyPlace,
     );
   }
 
@@ -63,12 +67,14 @@ class GameState extends Equatable {
     mergeSeq,
     lastTapX,
     outcome,
+    tapToAnyPlace,
   ];
 }
 
 final class GameCubit extends Cubit<GameState> {
-  GameCubit(this._repo)
-    : _rnd = Random(),
+  GameCubit(
+    this._repo,
+  ) : _rnd = Random(),
       super(
         const GameState(
           currentScore: 0,
@@ -77,6 +83,7 @@ final class GameCubit extends Cubit<GameState> {
           nextCandy: CandyType.level0,
           phase: GameUiPhase.hint,
           mergeSeq: 0,
+          tapToAnyPlace: false,
         ),
       );
 
@@ -86,13 +93,15 @@ final class GameCubit extends Cubit<GameState> {
   /// Loads persisted best score (call on game start).
   Future<void> load() async {
     final best = await _repo.getBestScore();
+    final tapToAnyPlace = await _repo.getTapToAnyPlace();
     emit(
       state.copyWith(
         bestScore: best,
         currentScore: 0,
         isOver: false,
-        phase: GameUiPhase.hint,
+        phase: tapToAnyPlace ? GameUiPhase.playing : GameUiPhase.hint,
         mergeSeq: 0,
+        tapToAnyPlace: tapToAnyPlace,
       ),
     );
     rollNext();
@@ -142,7 +151,7 @@ final class GameCubit extends Cubit<GameState> {
       state.copyWith(
         currentScore: 0,
         isOver: false,
-        phase: GameUiPhase.hint,
+        phase: state.tapToAnyPlace ? GameUiPhase.playing : GameUiPhase.hint,
       ),
     );
     rollNext();
@@ -180,6 +189,7 @@ final class GameCubit extends Cubit<GameState> {
     if (state.isOver) return;
     if (state.phase == GameUiPhase.hint) {
       emit(state.copyWith(phase: GameUiPhase.playing));
+      setTapToAnyPlace(true);
     }
   }
 
@@ -223,7 +233,7 @@ final class GameCubit extends Cubit<GameState> {
     emit(
       state.copyWith(
         isOver: false,
-        phase: GameUiPhase.hint,
+        phase: state.tapToAnyPlace ? GameUiPhase.playing : GameUiPhase.hint,
         currentScore: 0,
       ),
     );
@@ -234,10 +244,16 @@ final class GameCubit extends Cubit<GameState> {
     emit(
       state.copyWith(
         isOver: false,
-        phase: GameUiPhase.hint,
+        phase: state.tapToAnyPlace ? GameUiPhase.playing : GameUiPhase.hint,
         currentScore: bonus,
       ),
     );
     rollNext();
+  }
+
+  //Tap to any place
+  Future<void> setTapToAnyPlace(bool value) async {
+    emit(state.copyWith(tapToAnyPlace: value));
+    await _repo.setTapToAnyPlace(value);
   }
 }

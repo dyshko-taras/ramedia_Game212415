@@ -267,10 +267,11 @@ class _TapHintLayer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocSelector<GameCubit, GameState, GameUiPhase>(
-      selector: (s) => s.phase,
-      builder: (context, phase) {
-        if (phase != GameUiPhase.hint) return const SizedBox.shrink();
+    return BlocSelector<GameCubit, GameState, bool>(
+      // Show only if we are in hint phase AND user hasn't acknowledged it before
+      selector: (s) => s.phase == GameUiPhase.hint && !s.tapToAnyPlace,
+      builder: (context, show) {
+        if (!show) return const SizedBox.shrink();
         return Positioned.fill(
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,

@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart';
 /// - Respects user preference from [PrefsStore] (sound on/off)
 final class AudioService {
   AudioService(this._prefs, {String? bgmAsset})
-      : _bgmAsset = bgmAsset ?? 'background.mp3';
+    : _bgmAsset = bgmAsset ?? 'background.mp3';
 
   final PrefsStore _prefs;
   final String _bgmAsset;
@@ -19,7 +19,7 @@ final class AudioService {
   Future<void> init() async {
     if (_initialized) return;
     try {
-      FlameAudio.bgm.initialize();
+      await FlameAudio.bgm.initialize();
       // Preload gracefully; ignore if file is missing.
       await FlameAudio.audioCache.load(_bgmAsset);
       _initialized = true;
@@ -32,7 +32,6 @@ final class AudioService {
     } catch (e, st) {
       if (kDebugMode) {
         // Do not crash app if audio is absent; just log in debug
-        // ignore: avoid_print
         print('AudioService.init error: $e\n$st');
       }
     }
@@ -72,4 +71,3 @@ final class AudioService {
     }
   }
 }
-

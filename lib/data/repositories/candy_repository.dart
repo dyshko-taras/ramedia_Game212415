@@ -15,4 +15,8 @@ final class CandyRepository {
   Future<bool> isDialogueCompleted() => _store.getDialogueCompleted();
   Future<void> setDialogueCompleted(bool value) =>
       _store.setDialogueCompleted(value);
+
+  // Tap to any place setting
+  Future<bool> getTapToAnyPlace() => _store.getTapToAnyPlace();
+  Future<void> setTapToAnyPlace(bool value) => _store.setTapToAnyPlace(value);
 }
